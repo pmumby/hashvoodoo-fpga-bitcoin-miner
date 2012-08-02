@@ -1,0 +1,43 @@
+# UCF for a Cairnsmore1 board
+NET "osc_clk" LOC = "J1" |IOSTANDARD = "LVCMOS33" |PULLDOWN;
+
+# serial port receive & transmit
+NET "RxD" LOC = "C3"	|IOSTANDARD = "LVCMOS33" |PULLDOWN;
+NET "TxD" LOC = "F2" |IOSTANDARD = "LVCMOS33";
+
+# LED Array
+NET "led[0]" LOC = "A18";
+NET "led[1]" LOC = "B18";
+NET "led[2]" LOC = "A17";
+NET "led[3]" LOC = "A16";
+
+# DIP Switch Array
+NET "dip[0]" LOC = "A4";
+NET "dip[1]" LOC = "D6";
+NET "dip[2]" LOC = "C6";
+NET "dip[3]" LOC = "C8";
+
+# New split reset architecture:
+NET "reset_a" LOC = "B22";
+NET "reset_b" LOC = "D1";
+NET "reset_select" LOC = "D7" |PULLUP;
+
+# Input Clock from Controller
+NET "osc_clk" TNM_NET = osc_clk;
+TIMESPEC TS_osc_clk = PERIOD "osc_clk" 25 MHz HIGH 50%;
+
+# DCM Clocks
+NET "hash_clk" TNM_NET = hash_clk;
+NET "dv_clk" TNM_NET = dv_clk;
+TIMESPEC TS_hash_clk = PERIOD "hash_clk" 175 MHz HIGH 50 %;
+TIMESPEC TS_dv_clk = PERIOD "dv_clk" 25 MHz HIGH 50 %;
+
+# Various Timing Ignores
+NET "hash_clk" TNM_NET =  FFS "GRP_HASH";
+NET "dv_clk" TNM_NET =  FFS "GRP_COMM";
+TIMESPEC TS_Boundry1 = FROM "GRP_HASH" TO "GRP_COMM" TIG ;
+TIMESPEC TS_Boundry2 = FROM "GRP_COMM" TO "GRP_HASH" TIG ;
+NET "dip[*]" TIG;
+NET "M/midstate_d1[*]" TIG;
+NET "M/data2_d1[*]" TIG;
+NET "M/got_ticket_d1" TIG;

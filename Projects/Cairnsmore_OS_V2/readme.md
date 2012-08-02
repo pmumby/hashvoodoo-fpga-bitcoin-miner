@@ -1,0 +1,1 @@
+This will eventually hold the new bitstream with many new features. Most notable of which will be using the new hashing core.

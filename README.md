@@ -13,3 +13,6 @@ V2 will use the Voodoo mining core, which is my "new and improved" (read complet
 In addition, some other projects that will live here eventually:
 - Controller source code (hopefully a working opensource controller bitstream for cairnsmore1)
 - Ports of the same mining code to other FPGA boards. (mostly focusing on Xilinx based chips)
+
+We've started adding documentation to the wiki (mostly placeholders) Please contribute if you have something of use to add to those pages!
+https://github.com/pmumby/hashvoodoo-fpga-bitcoin-miner/wiki

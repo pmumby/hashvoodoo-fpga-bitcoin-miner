@@ -58,10 +58,6 @@
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="27"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="9"/>
     </file>
-    <file xil_pn:name="dcm_param.v" xil_pn:type="FILE_VERILOG">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="42"/>
-      <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
-    </file>
   </files>
 
   <properties>

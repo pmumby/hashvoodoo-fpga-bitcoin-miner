@@ -1,5 +1,5 @@
 # UCF for a Cairnsmore1 board
-NET "osc_clk" LOC = "J1" |IOSTANDARD = "LVCMOS33" |PULLDOWN;
+NET "osc_clk" LOC = "J1" |IOSTANDARD = "LVDS";
 
 # serial port receive & transmit
 NET "RxD" LOC = "C3"	|IOSTANDARD = "LVCMOS33" |PULLDOWN;

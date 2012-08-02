@@ -38,6 +38,7 @@ module uart_rx(
 	reg [3:0] state;
 	reg [3:0] bit_spacing;
 	reg [4:0] data_gap;
+	reg rx_buf1, rx_buf2;
 	wire next_bit;
 	wire rx_n;
 	
@@ -59,7 +60,7 @@ module uart_rx(
 	//================================================
 	
 	//Inverted rx for stability:
-	assign rx_n = ~rx;
+	assign rx_n = ~rx_buf2;
 	//Note: value below for bit_spacing check, defines where data sampling occurs
 	assign next_bit = (bit_spacing==SAMPLE_POINT);
 	//Gap Detection:
@@ -67,6 +68,13 @@ module uart_rx(
 	
 	//Toplevel Logic:
 	//================================================
+	
+	//Double Buffering
+	always @(posedge clk)
+		begin
+			rx_buf1 <= rx;
+			rx_buf2 <= rx_buf1;
+		end
 	
 	//Oversampling & Sync of RX Input to clock
 	always @(posedge clk)

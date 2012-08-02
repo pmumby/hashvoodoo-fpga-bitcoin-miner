@@ -1,5 +1,6 @@
 # UCF for a Cairnsmore1 board
-NET "osc_clk" LOC = "J1" |IOSTANDARD = "LVDS";
+NET "hash_clk" LOC = "J1" |IOSTANDARD = "LVDS";	//200Mhz Clock for hashing from controller
+NET "comm_clk" LOC = "C1" |IOSTANDARD = "LVDS";	//25Mhz Clock for UART from controller
 
 # serial port receive & transmit
 NET "RxD" LOC = "C3"	|IOSTANDARD = "LVCMOS33" |PULLDOWN;

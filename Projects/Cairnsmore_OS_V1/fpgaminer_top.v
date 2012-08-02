@@ -4,7 +4,8 @@
 // Paul Mumby 2012
 //////////////////////////////////////////////////////////////////////////////////
 module fpgaminer_top (
-		osc_clk, 
+		hash_clk, 
+		comm_clk, 
 		RxD, 
 		TxD, 
 		led, 
@@ -16,16 +17,16 @@ module fpgaminer_top (
 
 	//Parameters:
 	//================================================
-	parameter OSC_CLOCK_RATE = 200000000;			//Input Clock From Controller (in Hz)
-	parameter HASH_CLOCK_RATE = OSC_CLOCK_RATE;	//Hasher Clock Output from DCM (in Hz)
-	parameter COMM_CLOCK_RATE = OSC_CLOCK_RATE;	//Communications Clock Output from DCM (in Hz)
+	parameter HASH_CLOCK_RATE = 200000000;			//Hasher Clock Output from Controller in Hz
+	parameter COMM_CLOCK_RATE = 25000000;			//Communications Clock Output from Controller in Hz
 	parameter UART_BAUD_RATE = 115200;				//Baud Rate to use for UART (BPS)
 	parameter UART_SAMPLE_POINT = 8;					//Point in the oversampled wave to sample the bit state for the UART (6-12 should be valid)
 	parameter CLOCK_FLASH_BITS = 24;					//Number of bits for divider of flasher. (24bit = approx 16M Divider)
 	
 	//IO Definitions:
 	//================================================
-   input osc_clk;			//Input Oscillator Clock From Controller
+   input hash_clk;		//Input Hash Clock From Controller
+   input comm_clk;		//Input UART Clock From Controller
    input RxD;				//UART RX Pin (From Controller)
    output TxD;				//UART TX Pin  (To Controller)
    output [3:0] led;		//LED Array
@@ -37,7 +38,7 @@ module fpgaminer_top (
 	//Register/Wire Definitions:
 	//================================================
 	reg reset;								//Actual Reset Signal
-	wire main_clk;							//Actually Used Clock Signals
+	wire hash_clk_buf,comm_clk_buf;	//Actually Used Clock Signals
 	wire clock_flash;						//Flasher output (24bit divider of clock)
 	wire nonce_start = dip[1];			//Nonce Range Start (msb of nonce range). TODO: Kill this
 	wire miner_busy;						//Miner Busy Flag
@@ -69,14 +70,15 @@ module fpgaminer_top (
 	//================================================
 	
 	//Clock Input BUFG
-	BUFG clk_bufg (.I(osc_clk), .O(main_clk));
+	BUFG clk_bufg (.I(hash_clk), .O(hash_clk_buf));
+	BUFG clk_bufg (.I(comm_clk), .O(comm_clk_buf));
 	
 	//Hub core, this is a holdover from Icarus. This should be cleaned up and ported back to core logic, since miners are now "solo".
 	//TODO: Cleanup old icarus stuff
    hub_core #(
 			.SLAVES(1)
 		) hc (
-			.hash_clk(main_clk), 
+			.hash_clk(comm_clk_buf), 
 			.new_nonces(new_nonces), 
 			.golden_nonce(golden_nonce), 
 			.serial_send(serial_send), 
@@ -90,7 +92,7 @@ module fpgaminer_top (
 			.BAUD(UART_BAUD_RATE),
 			.SAMPLE_POINT(UART_SAMPLE_POINT)
 		) SERIAL_COMM (
-			.clk(main_clk),
+			.clk(comm_clk_buf),
 			.rx(RxD),
 			.tx(TxD),
 			.rx_ready(start_mining),
@@ -103,7 +105,7 @@ module fpgaminer_top (
 		
 	//Main Hashing Core, This does all the work
 	sha256_top M (
-			.clk(main_clk), 
+			.clk(hash_clk_buf), 
 			.rst(reset), 
 			.midstate(midstate), 
 			.data2(data2), 
@@ -118,13 +120,13 @@ module fpgaminer_top (
 	flasher #(
 			.BITS(CLOCK_FLASH_BITS)
 		) CLK_FLASH (
-			.clk(main_clk),
+			.clk(comm_clk_buf),
 			.flash(clock_flash)
 		);
 	
 	//PWM Fader core. This triggers on a new nonce found, flashes to full brightness, then fades out for nonce found LED.
 	pwm_fade pf1 (
-			.clk(main_clk), 
+			.clk(comm_clk_buf), 
 			.trigger(|new_nonces), 
 			.drive(led_nonce_fade)
 		);	
@@ -142,7 +144,7 @@ module fpgaminer_top (
 		end
 
 	//Clock Domain Buffering of ticket signal (I believe) TODO: Identify & Cleanup
-	always@ (posedge main_clk)
+	always@ (posedge comm_clk_buf)
 		begin
 			ticket_CS <= ticket_NS;
 		end
@@ -160,7 +162,7 @@ module fpgaminer_top (
 		end
 
 	//Communications Clock Domain Ticket Processing code TODO: Cleanup
-	always@ (posedge main_clk)
+	always@ (posedge comm_clk_buf)
 		begin
 			new_ticket <= (ticket_CS == 4'b0100);
 		end

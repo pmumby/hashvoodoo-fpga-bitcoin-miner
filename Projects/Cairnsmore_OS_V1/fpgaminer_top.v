@@ -70,8 +70,8 @@ module fpgaminer_top (
 	//================================================
 	
 	//Clock Input BUFG
-	BUFG clk_bufg (.I(hash_clk), .O(hash_clk_buf));
-	BUFG clk_bufg (.I(comm_clk), .O(comm_clk_buf));
+	BUFG clk_hash_bufg (.I(hash_clk), .O(hash_clk_buf));
+	BUFG clk_comm_bufg (.I(comm_clk), .O(comm_clk_buf));
 	
 	//Hub core, this is a holdover from Icarus. This should be cleaned up and ported back to core logic, since miners are now "solo".
 	//TODO: Cleanup old icarus stuff

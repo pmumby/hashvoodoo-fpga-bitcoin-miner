@@ -23,19 +23,15 @@ NET "reset_a" LOC = "B22";
 NET "reset_b" LOC = "D1";
 NET "reset_select" LOC = "D7" |PULLUP;
 
-# Input Clock from Controller
-NET "osc_clk" TNM_NET = osc_clk;
-TIMESPEC TS_osc_clk = PERIOD "osc_clk" 25 MHz HIGH 50%;
-
-# DCM Clocks
+# Input Clocks from Controller
 NET "hash_clk" TNM_NET = hash_clk;
-NET "dv_clk" TNM_NET = dv_clk;
+NET "comm_clk" TNM_NET = comm_clk;
 TIMESPEC TS_hash_clk = PERIOD "hash_clk" 175 MHz HIGH 50 %;
-TIMESPEC TS_dv_clk = PERIOD "dv_clk" 25 MHz HIGH 50 %;
+TIMESPEC TS_comm_clk = PERIOD "comm_clk" 25 MHz HIGH 50 %;
 
 # Various Timing Ignores
 NET "hash_clk" TNM_NET =  FFS "GRP_HASH";
-NET "dv_clk" TNM_NET =  FFS "GRP_COMM";
+NET "comm_clk" TNM_NET =  FFS "GRP_COMM";
 TIMESPEC TS_Boundry1 = FROM "GRP_HASH" TO "GRP_COMM" TIG ;
 TIMESPEC TS_Boundry2 = FROM "GRP_COMM" TO "GRP_HASH" TIG ;
 NET "dip[*]" TIG;

@@ -1,6 +1,8 @@
 # UCF for a Cairnsmore1 board
-NET "hash_clk" LOC = "J1" |IOSTANDARD = "LVDS_25";	//200Mhz Clock for hashing from controller
-NET "comm_clk" LOC = "C1" |IOSTANDARD = "LVDS_25";	//25Mhz Clock for UART from controller
+NET "hash_clk_n" LOC = "J1" |IOSTANDARD = "LVDS_25";		//200Mhz Clock for hashing from controller
+NET "hash_clk_p" LOC = "J3" |IOSTANDARD = "LVDS_25";		//200Mhz Clock for hashing from controller
+NET "comm_clk" LOC = "C1" |IOSTANDARD = "LVCMOS33";	//25Mhz Clock for UART from controller
+NET "comm_clk" CLOCK_DEDICATED_ROUTE = FALSE;
 
 # serial port receive & transmit
 NET "RxD" LOC = "C3"	|IOSTANDARD = "LVCMOS33" |PULLDOWN;
@@ -24,13 +26,13 @@ NET "reset_b" LOC = "D1";
 NET "reset_select" LOC = "D7" |PULLUP;
 
 # Input Clocks from Controller
-NET "hash_clk" TNM_NET = hash_clk;
+NET "hash_clk_buf" TNM_NET = hash_clk_buf;
 NET "comm_clk" TNM_NET = comm_clk;
-TIMESPEC TS_hash_clk = PERIOD "hash_clk" 175 MHz HIGH 50 %;
+TIMESPEC TS_hash_clk_buf = PERIOD "hash_clk_buf" 175 MHz HIGH 50 %;
 TIMESPEC TS_comm_clk = PERIOD "comm_clk" 25 MHz HIGH 50 %;
 
 # Various Timing Ignores
-NET "hash_clk" TNM_NET =  FFS "GRP_HASH";
+NET "hash_clk_buf" TNM_NET =  FFS "GRP_HASH";
 NET "comm_clk" TNM_NET =  FFS "GRP_COMM";
 TIMESPEC TS_Boundry1 = FROM "GRP_HASH" TO "GRP_COMM" TIG ;
 TIMESPEC TS_Boundry2 = FROM "GRP_COMM" TO "GRP_HASH" TIG ;

@@ -1,0 +1,81 @@
+############################################################################
+# CAIRNSMORE1 ARRAY FPGA PINOUT WITH CONNECTIONS TO OTHER DEVICES
+############################################################################
+
+##############
+# DEVICE MAP #
+##############
+                                         ###########            ###########
+                                         #         #            #         #
+                                         #  FPGA0  #            #  FPGA1  #
+               ##############            #         #            #         #
+               #            #            #         #            #         #
+               #            #            ###########            ###########   
+               # CONTROLLER #               
+               #            #
+               #            #
+               ##############
+                                         ###########            ###########
+                                         #         #            #         #
+                                         #  FPGA3  #            #  FPGA2  #
+                                         #         #            #         #
+                                         #         #            #         #
+                                         ###########            ###########
+#########
+# CODES #
+#########
+# CT = CONTROLLER
+# F0 = FPGA0
+# F1 = FPGA1
+# F2 = FPGA2
+# F3 = FPGA3
+
+######################################
+# CLOCKS                               >> CONNECTS TO ON    FPGA0       FPGA1       FPGA2       FPGA3   
+######################################                      
+NET "CLOCK_N" LOC = J1;              #                      CT"P78"     CT"P93"     CT"P64"     CT"P32"      
+NET "CLOCK_P" LOC = J3;              #                      CT"P76"     CT"P91"     CT"P63"     CT"P31"      
+
+######################################
+# CONNECTIONS THAT HAVE DIFFERENT USES >> CONNECTS TO ON    FPGA0       FPGA1       FPGA2       FPGA3  
+######################################                      
+NET "LINK_1" LOC = "D1";             #                      CT"P83"     FO"B21"     F2"B21"     CT"P48"     
+NET "LINK_2" LOC = "D2";             #                      CT"P88"     F0"D21"     F2"D21"     CT"P47"     
+NET "LINK_3" LOC = "B1";             #                      CT"P87"     FO"B22"     F2"B22"     CT"P50"     
+NET "LINK_4" LOC = "B2";             #                      CT"P84"     F0"D22"     F2"D22"     CT"P51"     
+NET "LINK_5" LOC = "B22";            #                      F1"B1"      CT"P101"    CT"P57"     F3"B1"    
+NET "LINK_6" LOC = "D22";            #                      F1"B2"      CT"P103"    CT"P59"     F3"B2"    
+NET "LINK_7" LOC = "B21";            #                      F1"D1"      CT"P99"     CT"P55"     F3"D1"    
+NET "LINK_8" LOC = "D21";            #                      F1"D2"      CT"P105"    CT"P58"     F3"D2"    
+
+######################################
+# DIRECT CONNECTIONS ALWAYS TO CONTROLLER >>CONNECTS TO ON  FPGA0       FPGA1       FPGA2       FPGA3
+######################################
+NET "CONTROLLER_1"  LOC = C3;        #                      CT"P90"     CT"P102"    CT"P54"     CT"P70"
+NET "CONTROLLER_2"  LOC = C1;        #                      CT"P85"     CT"P98"     CT"P49"     CT"P69"
+NET "CONTROLLER_3"  LOC = F2;        #                      CT"P82"     CT"P96"     CT"P42"     CT"P68"
+NET "CONTROLLER_4"  LOC = F1;        #                      CT"P79"     CT"P92"     CT"P46"     CT"P60"
+
+######################################
+# LEDS
+######################################
+NET "LED[0]" LOC = A17;
+NET "LED[1]" LOC = B18;
+NET "LED[2]" LOC = A18;
+NET "LED[3]" LOC = A16;
+
+######################################
+# DIP SWITCHES
+######################################
+NET "DIP[0]" LOC = A4;
+NET "DIP[1]" LOC = D6;
+NET "DIP[2]" LOC = C6;
+NET "DIP[3]" LOC = C8;
+
+######################################
+# TEMPERATURE SENSOR
+######################################
+NET "SDA"   LOC = AB13;
+NET "SCL"   LOC = AB14;
+NET "INT"   LOC = AB15;
+

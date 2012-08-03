@@ -4,7 +4,8 @@
 // Paul Mumby 2012
 //////////////////////////////////////////////////////////////////////////////////
 module fpgaminer_top (
-		hash_clk, 
+		hash_clk_p, 
+		hash_clk_n, 
 		comm_clk, 
 		RxD, 
 		TxD, 
@@ -25,7 +26,8 @@ module fpgaminer_top (
 	
 	//IO Definitions:
 	//================================================
-   input hash_clk;		//Input Hash Clock From Controller
+   input hash_clk_p;		//Input Hash Clock From Controller (P signal of diff pair)
+   input hash_clk_n;		//Input Hash Clock From Controller (N signal of diff pair)
    input comm_clk;		//Input UART Clock From Controller
    input RxD;				//UART RX Pin (From Controller)
    output TxD;				//UART TX Pin  (To Controller)
@@ -70,9 +72,21 @@ module fpgaminer_top (
 	//================================================
 	
 	//Clock Input BUFG
-	BUFG clk_hash_bufg (.I(hash_clk), .O(hash_clk_buf));
-	BUFG clk_comm_bufg (.I(comm_clk), .O(comm_clk_buf));
-	
+	BUFG clk_comm_bufg (
+			.I(comm_clk), 
+			.O(comm_clk_buf)
+		);
+
+	//LVDS Clock Buffer
+	IBUFGDS #(
+			.DIFF_TERM("FALSE"),
+			.IOSTANDARD("DEFAULT")
+		) ibufgds_hash_clk (
+			.O(hash_clk_buf),
+			.I(hash_clk_p),	//Diff_p clock input
+			.IB(hash_clk_n)	//Diff_n clock input
+		);
+			
 	//Hub core, this is a holdover from Icarus. This should be cleaned up and ported back to core logic, since miners are now "solo".
 	//TODO: Cleanup old icarus stuff
    hub_core #(

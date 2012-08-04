@@ -100,7 +100,6 @@ module serial_core #(parameter CLOCK=25000000, BAUD=57600, SAMPLE_POINT=8)(
 			end
 		else
 			rx_input_buffer <= rx_input_buffer;
-		rx_ready <= (Baud8Tick && next_bit && state==4'b0001 && ~RxD_bit_inv);
 	end
 	
 

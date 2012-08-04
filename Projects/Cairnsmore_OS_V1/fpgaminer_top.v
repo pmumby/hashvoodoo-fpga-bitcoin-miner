@@ -22,7 +22,7 @@ module fpgaminer_top (
 	parameter COMM_CLOCK_RATE = 25000000;			//Communications Clock Output from Controller in Hz
 	parameter UART_BAUD_RATE = 115200;				//Baud Rate to use for UART (BPS)
 	parameter UART_SAMPLE_POINT = 8;					//Point in the oversampled wave to sample the bit state for the UART (6-12 should be valid)
-	parameter CLOCK_FLASH_BITS = 24;					//Number of bits for divider of flasher. (24bit = approx 16M Divider)
+	parameter CLOCK_FLASH_BITS = 28;					//Number of bits for divider of flasher. (28bit = approx 134M Divider)
 	
 	//IO Definitions:
 	//================================================
@@ -53,6 +53,7 @@ module fpgaminer_top (
 	wire start_mining;					//Start Mining flag. This flag going high will trigger the worker to begin hashing on it's buffer
 	wire got_ticket;						//Got Ticket flag indicates the local worker found a new nonce. TODO: Again, cleanup
 	wire led_nonce_fade;					//This is the output from the fader, jumps to full power when nonce found and fades out
+	wire led_serial_fade;				//Output from fader for serial activity.
 	reg new_ticket;						//Related to got_ticket TODO: Cleanup old icarus stuff
 	reg [3:0]ticket_CS = 4'b0001;		//Again... Cleanup
 	reg [3:0]ticket_NS;					//Again... Cleanup
@@ -61,11 +62,8 @@ module fpgaminer_top (
 	//================================================
 	assign new_nonces = new_ticket;					//TODO: Cleanup
 	assign led[0] = led_nonce_fade;					//LED0 (Green): New Nonce Beacon (fader)
-	assign led[1] = (~TxD || ~RxD);					//LED1 (Red): UART Activity (blinks on either rx or tx)
-   assign led[2] = clock_flash;						//LED2 (Blue): Clock Validator:
-																//OFF: No valid clock seen at all
-																//ON SOLID: Clock Signal is seen, but DCM has bad lock, or DCM output is bad
-																//BLINKING: Clock signal is seen, and DCM is in good state. Output clocks are valid
+   assign led[1] = clock_flash;						//LED1 (Red): Clock Heartbeat (blinks to indicate working input clock)
+	assign led[2] = (~TxD || ~RxD);					//LED2 (Blue): UART Activity (blinks on either rx or tx)
  	assign led[3] = ~miner_busy;						//LED3 (Amber): Idle Indicator. Lights when miner has nothing to do.
 
 	//Module Instantiation:
@@ -134,15 +132,22 @@ module fpgaminer_top (
 	flasher #(
 			.BITS(CLOCK_FLASH_BITS)
 		) CLK_FLASH (
-			.clk(comm_clk_buf),
+			.clk(hash_clk_buf),
 			.flash(clock_flash)
 		);
 	
-	//PWM Fader core. This triggers on a new nonce found, flashes to full brightness, then fades out for nonce found LED.
-	pwm_fade pf1 (
+	//Nonce PWM Fader core. This triggers on a new nonce found, flashes to full brightness, then fades out for nonce found LED.
+	pwm_fade pwm_fade_nonce (
 			.clk(comm_clk_buf), 
 			.trigger(|new_nonces), 
 			.drive(led_nonce_fade)
+		);	
+
+	//Serial PWM Fader core. This triggers on a new nonce found, flashes to full brightness, then fades out for nonce found LED.
+	pwm_fade pwm_fade_serial (
+			.clk(comm_clk_buf), 
+			.trigger(~TxD || ~RxD), 
+			.drive(led_serial_fade)
 		);	
 	
 	//Toplevel Logic:

@@ -27,7 +27,6 @@ module sha256_top (
     miner_busy,
     got_ticket,
     golden_nonce,
-	 nonce_start,
 	 start_mining
 );
 
@@ -35,7 +34,6 @@ parameter NONCE_CT = 31'd256;
 
 input           clk;
 input           rst;
-input nonce_start;
 input start_mining;
 
 input   [255:0] midstate;

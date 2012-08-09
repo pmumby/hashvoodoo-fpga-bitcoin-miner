@@ -1,24 +1,24 @@
 # UCF for a Cairnsmore1 board
-NET "hash_clk_n" LOC = "J1" |IOSTANDARD = "LVDS_25";		//200Mhz Clock for hashing from controller
-NET "hash_clk_p" LOC = "J3" |IOSTANDARD = "LVDS_25";		//200Mhz Clock for hashing from controller
+NET "hash_clk_n" LOC = "J1" |IOSTANDARD = "LVDS_33";		//200Mhz Clock for hashing from controller
+NET "hash_clk_p" LOC = "J3" |IOSTANDARD = "LVDS_33";		//200Mhz Clock for hashing from controller
 NET "comm_clk" LOC = "C1" |IOSTANDARD = "LVCMOS33";	//25Mhz Clock for UART from controller
 NET "comm_clk" CLOCK_DEDICATED_ROUTE = FALSE;
 
 # serial port receive & transmit
-NET "RxD" LOC = "C3"	|IOSTANDARD = "LVCMOS33" |PULLDOWN;
-NET "TxD" LOC = "F2" |IOSTANDARD = "LVCMOS33";
+NET "RxD" LOC = "C3"	|IOSTANDARD = "LVCMOS33" |PULLUP;
+NET "TxD" LOC = "F2" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
 
 # LED Array
-NET "led[0]" LOC = "A18";
-NET "led[1]" LOC = "B18";
-NET "led[2]" LOC = "A17";
-NET "led[3]" LOC = "A16";
+NET "led[0]" LOC = "A18" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
+NET "led[1]" LOC = "B18" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
+NET "led[2]" LOC = "A17" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
+NET "led[3]" LOC = "A16" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
 
 # DIP Switch Array
-NET "dip[0]" LOC = "A4";
-NET "dip[1]" LOC = "D6";
-NET "dip[2]" LOC = "C6";
-NET "dip[3]" LOC = "C8";
+NET "dip[0]" LOC = "A4" |IOSTANDARD = "LVCMOS33";
+NET "dip[1]" LOC = "D6" |IOSTANDARD = "LVCMOS33";
+NET "dip[2]" LOC = "C6" |IOSTANDARD = "LVCMOS33";
+NET "dip[3]" LOC = "C8" |IOSTANDARD = "LVCMOS33";
 
 # New split reset architecture:
 NET "reset_a" LOC = "B22";
@@ -28,7 +28,7 @@ NET "reset_select" LOC = "D7" |PULLUP;
 # Input Clocks from Controller
 NET "hash_clk_buf" TNM_NET = hash_clk_buf;
 NET "comm_clk" TNM_NET = comm_clk;
-TIMESPEC TS_hash_clk_buf = PERIOD "hash_clk_buf" 175 MHz HIGH 50 %;
+TIMESPEC TS_hash_clk_buf = PERIOD "hash_clk_buf" 180 MHz HIGH 50 %;
 TIMESPEC TS_comm_clk = PERIOD "comm_clk" 25 MHz HIGH 50 %;
 
 # Various Timing Ignores
@@ -40,3 +40,6 @@ NET "dip[*]" TIG;
 NET "M/midstate_d1[*]" TIG;
 NET "M/data2_d1[*]" TIG;
 NET "M/got_ticket_d1" TIG;
+
+#VCCAUX Line Config From makomk
+CONFIG VCCAUX=3.3;

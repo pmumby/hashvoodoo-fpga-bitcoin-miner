@@ -42,7 +42,6 @@ module fpgaminer_top (
 	reg reset;								//Actual Reset Signal
 	wire hash_clk_buf,comm_clk_buf;	//Actually Used Clock Signals
 	wire clock_flash;						//Flasher output (24bit divider of clock)
-	wire nonce_start = dip[1];			//Nonce Range Start (msb of nonce range). TODO: Kill this
 	wire miner_busy;						//Miner Busy Flag
    wire [32:0] slave_nonces;			//Nonce found by worker TODO: Rename/Cleanup (this is a holdover from the icarus pair code)
    wire new_nonces;						//Flag indicating new nonces found
@@ -77,7 +76,7 @@ module fpgaminer_top (
 
 	//LVDS Clock Buffer
 	IBUFGDS #(
-			.DIFF_TERM("FALSE"),
+			.DIFF_TERM("TRUE"),
 			.IOSTANDARD("DEFAULT")
 		) ibufgds_hash_clk (
 			.O(hash_clk_buf),
@@ -123,8 +122,7 @@ module fpgaminer_top (
 			.data2(data2), 
 			.golden_nonce(slave_nonces[31:0]), 
 			.got_ticket(got_ticket), 
-			.miner_busy(miner_busy), 
-			.nonce_start(nonce_start), 
+			.miner_busy(miner_busy),  
 			.start_mining(start_mining)
 		);
 	

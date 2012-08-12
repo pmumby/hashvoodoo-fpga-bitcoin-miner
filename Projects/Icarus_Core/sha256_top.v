@@ -30,7 +30,7 @@ module sha256_top (
 	 start_mining
 );
 
-parameter NONCE_CT = 32'd512;
+parameter NONCE_CT = 32'd256;
 
 input           clk;
 input           rst;

@@ -1,3 +1,15 @@
+--
+--   E N T E R P O I N T   L T D
+--
+-----------------------------------------------------------------------------------------------
+--
+-- AUTHOR   : R FITZER
+-- DATED    : 11/05/2012
+--
+-- COMMENTS : Cairnsmore 1 Test Program
+--
+--
+-----------------------------------------------------------------------------------------------
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
@@ -9,10 +21,15 @@ PORT (
 	-- 25MHz CLOCK FROM OSCILLATOR
 	CLOCK_25MHZ			      : IN STD_LOGIC;
 	--  CLOCKS FROM CLOCK GENERATOR
-	CLK50					: IN STD_LOGIC;
-	CLK100				: IN STD_LOGIC;
-	CLK150				: IN STD_LOGIC;
-	CLK200				: IN STD_LOGIC;
+-- 	CLK50					: IN STD_LOGIC;
+-- 	CLK100				: IN STD_LOGIC;
+-- 	CLK150				: IN STD_LOGIC;
+-- 	CLK200				: IN STD_LOGIC;
+   
+--    CLK_180MHZ        :  IN    STD_LOGIC;
+--    CLK_190MHZ        :  IN    STD_LOGIC;
+--    CLK_200MHZ        :  IN    STD_LOGIC;
+   CLK_180MHZ_210MHZ :  IN    STD_LOGIC;
 
 	CLOCKS1_1			: OUT STD_LOGIC;
 	CLOCKS1_2			: OUT STD_LOGIC;
@@ -30,7 +47,7 @@ PORT (
 	SWITCH1				: IN STD_LOGIC;
 	SWITCH2				: IN STD_LOGIC;
 	SWITCH3				: IN STD_LOGIC;
---	SWITCH4				: IN STD_LOGIC;
+	SWITCH4				: IN STD_LOGIC;
 	SWITCH5				: IN STD_LOGIC;
 	SWITCH6				: IN STD_LOGIC;
 --	SWITCH7				: IN STD_LOGIC;
@@ -194,6 +211,10 @@ COMPONENT CLOCKGEN_CONTROLLER
   PORT( 
 		CLOCK          	:  IN 	STD_LOGIC;
       RST_N             :  IN 	STD_LOGIC;
+      
+      SWITCH_5_4              :  IN    STD_LOGIC_VECTOR( 1 DOWNTO 0);
+      
+      
       CLK_SCLK          :  OUT   STD_LOGIC;
       CLK_SDAT          :  INOUT STD_LOGIC;
 		IDT_SCLK      				:  OUT   STD_LOGIC;
@@ -293,7 +314,7 @@ SIGNAL FAN2_IS_OK             :  STD_LOGIC;
 SIGNAL FAN3_IS_OK             :  STD_LOGIC;
 SIGNAL FAN4_IS_OK             :  STD_LOGIC;
 SIGNAL FAN_IS_RUNNING         :  STD_LOGIC;
-SIGNAL SWITCH4                :  STD_LOGIC;
+--SIGNAL SWITCH4                :  STD_LOGIC;
 --SIGNAL SWITCH5                :  STD_LOGIC;
 SIGNAL INT_USBC_1             :  STD_LOGIC;
 SIGNAL INT_USBC_9             :  STD_LOGIC;
@@ -334,7 +355,7 @@ SIGNAL SHIFT_REG_USB3_7       :  STD_LOGIC_VECTOR( 2 DOWNTO 0);
 SIGNAL SHIFT_REG_USB4_7       :  STD_LOGIC_VECTOR( 2 DOWNTO 0);   
 SIGNAL DCM_NOT_LOCKED         :  STD_LOGIC;   
 SIGNAL CLOCK_STOP_N           :  STD_LOGIC;
-
+SIGNAL SWITCH_5_4          : STD_LOGIC_VECTOR( 1 DOWNTO 0);
 
 --
 
@@ -374,23 +395,23 @@ end COMPONENT;
 
 BEGIN
 
-SWITCH4  <= '0';
+--SWITCH4  <= '0';
 --SWITCH5  <= '0';
 
 CLOCK_STOP_N <= NOT CLOCK_STOP;
 
-DCM1 : CLOCKPHASE3 
-port MAP(CLKIN_IN          => CLK200               ,
-         RST_IN            => RESET                ,
-         CLOCK_STOP        => CLOCK_STOP           ,
-         CLKIN_IBUFG_OUT   => CLKIN_IBUFG_OUT      ,
-         CLK0_OUT          => CLOCK_200MHZ_000_DEG ,
-         CLK90_OUT         => CLOCK_200MHZ_090_DEG ,
-         CLK180_OUT        => CLOCK_200MHZ_180_DEG ,
-         CLK270_OUT        => CLOCK_200MHZ_270_DEG ,
-         LOCKED_OUT        => CLOCK_200MHZ_LOCKED  );
+-- DCM1 : CLOCKPHASE3 
+-- port MAP(CLKIN_IN          => CLK200               ,
+--          RST_IN            => RESET                ,
+--          CLOCK_STOP        => CLOCK_STOP           ,
+--          CLKIN_IBUFG_OUT   => CLKIN_IBUFG_OUT      ,
+--          CLK0_OUT          => CLOCK_200MHZ_000_DEG ,
+--          CLK90_OUT         => CLOCK_200MHZ_090_DEG ,
+--          CLK180_OUT        => CLOCK_200MHZ_180_DEG ,
+--          CLK270_OUT        => CLOCK_200MHZ_270_DEG ,
+--          LOCKED_OUT        => CLOCK_200MHZ_LOCKED  );
           
-DCM_NOT_LOCKED <= NOT CLOCK_200MHZ_LOCKED;
+-- DCM_NOT_LOCKED <= NOT CLOCK_200MHZ_LOCKED;
 
 
 -- --TEMP
@@ -402,82 +423,156 @@ DCM_NOT_LOCKED <= NOT CLOCK_200MHZ_LOCKED;
 -- DCM_NOT_LOCKED        <= '0';
 
 
-OP_PHASER1 : PROCESS(RESET,CLOCK_200MHZ_000_DEG)
-BEGIN
-IF (RESET = '1') THEN
-   CLOCK_ENABLE_PHASER  <= "00001111";
-   DATA_PHASE_000       <= '0';
-   USB1_6	            <= '0';
---   USB1_5               <= '1';   --OUT
-   SHIFT_REG_USB1_7     <= "111";
-   REG_USB1_7           <= '1';
-   
+-- OP_PHASER1 : PROCESS(RESET,CLOCK_200MHZ_000_DEG)
+-- BEGIN
+-- IF (RESET = '1') THEN
+--    CLOCK_ENABLE_PHASER  <= "00001111";
+--    DATA_PHASE_000       <= '0';
+--    USB1_6	            <= '0';
+-- --   USB1_5               <= '1';   --OUT
+--    SHIFT_REG_USB1_7     <= "111";
+--    REG_USB1_7           <= '1';
+--    
+-- --    USB2_6	         <= '0';
+-- --    USB3_6	         <= '0';
+-- --    USB4_6	         <= '0';
+-- ELSIF (CLOCK_200MHZ_000_DEG'EVENT  AND CLOCK_200MHZ_000_DEG='1') THEN
+--    CLOCK_ENABLE_PHASER  <= CLOCK_ENABLE_PHASER(6 DOWNTO 0) & CLOCK_ENABLE_PHASER(7);
+--    DATA_PHASE_000       <= CLOCK_ENABLE_PHASER(7);
+--    USB1_6	         <= DATA_PHASE_000;
+-- 
+-- --    --COM PORT ENABLED
+-- --    IF (SWITCH5 = '0') THEN
+-- --       USB1_5  <= USBC_0;   --OUT
+-- --    --NOT ENABLED   
+-- --    ELSE
+-- --       USB1_5  <= '1';   --OUT
+-- --    END IF;
+--    
+--    SHIFT_REG_USB1_7           <= SHIFT_REG_USB1_7(1 DOWNTO 0) & USB1_7;
+--    
+--    IF    (SHIFT_REG_USB1_7 = "111") THEN
+--       REG_USB1_7 <= '1';   
+--    ELSIF (SHIFT_REG_USB1_7 = "000") THEN   
+--       REG_USB1_7 <= '0';
+--    ELSE
+--       REG_USB1_7 <= REG_USB1_7;
+--    END IF;
+--    
+-- --    USB2_6	         <= DATA_PHASE_000;
+-- --    USB3_6	         <= DATA_PHASE_000;
+-- --    USB4_6	         <= DATA_PHASE_000;
+--    
+-- END IF;
+-- END PROCESS OP_PHASER1;
+-- 
+-- 
+-- OP_PHASER2 : PROCESS(RESET,CLOCK_200MHZ_090_DEG)
+-- BEGIN
+-- IF (RESET = '1') THEN
+--    DATA_PHASE_090    <= '0';
 --    USB2_6	         <= '0';
---    USB3_6	         <= '0';
+-- --    USB2_5            <= '1' ;   --OUT
+--    SHIFT_REG_USB2_7  <= "111";
+--    REG_USB2_7           <= '1';
+-- --    REG_USB4_7        <= '1';   
+-- 
+-- ELSIF (CLOCK_200MHZ_090_DEG'EVENT  AND CLOCK_200MHZ_090_DEG='1') THEN
+--    DATA_PHASE_090       <= DATA_PHASE_180_ADV1;
+--    USB2_6	         <= DATA_PHASE_090;
+-- 
+-- --    --COM PORT ENABLED
+-- --    IF (SWITCH5 = '0') THEN
+-- --       USB2_5  <= USBC_8 ;   --OUT
+-- --    --NOT ENABLED   
+-- --    ELSE
+-- --       USB2_5  <= '1' ;   --OUT
+-- --    END IF;
+--    
+--    SHIFT_REG_USB2_7  <= SHIFT_REG_USB2_7(1 DOWNTO 0) & USB2_7;
+--    
+--    IF    (SHIFT_REG_USB2_7 = "111") THEN
+--       REG_USB2_7 <= '1';   
+--    ELSIF (SHIFT_REG_USB2_7 = "000") THEN   
+--       REG_USB2_7 <= '0';
+--    ELSE
+--       REG_USB2_7 <= REG_USB2_7;
+--    END IF;
+--    
+-- --    IF    (SHIFT_REG_USB4_7 = "111") THEN
+-- --       REG_USB4_7 <= '1';   
+-- --    ELSIF (SHIFT_REG_USB4_7 = "000") THEN   
+-- --       REG_USB4_7 <= '0';
+-- --    ELSE
+-- --       REG_USB4_7 <= REG_USB4_7;
+-- --    END IF;
+-- --    
+-- END IF;
+-- END PROCESS OP_PHASER2;
+-- 
+-- 
+-- OP_PHASER3 : PROCESS(RESET,CLOCK_200MHZ_180_DEG)
+-- BEGIN
+-- IF (RESET = '1') THEN
+--    DATA_PHASE_180_ADV1  <= '0';
+--    DATA_PHASE_180       <= '0';
+--    USB3_6	            <= '0';
+-- --    USB3_5               <= '1';   --OUT
+--    SHIFT_REG_USB3_7     <= "111";
+--    REG_USB3_7           <= '1';   
+-- 
+--    
+-- ELSIF (CLOCK_200MHZ_180_DEG'EVENT  AND CLOCK_200MHZ_180_DEG='1') THEN
+--    DATA_PHASE_180_ADV1  <= CLOCK_ENABLE_PHASER(7);
+--    DATA_PHASE_180       <= DATA_PHASE_000;
+--    USB3_6	         <= DATA_PHASE_180;
+-- 
+-- --    --COM PORT ENABLED
+-- --    IF (SWITCH5 = '0') THEN
+-- --       USB3_5  <= USBC_16;   --OUT
+-- --    --NOT ENABLED   
+-- --    ELSE
+-- --       USB3_5  <= '1';   --OUT
+-- --    END IF;  
+--    
+--    SHIFT_REG_USB3_7 <= SHIFT_REG_USB3_7(1 DOWNTO 0) & USB3_7;
+--    
+--    IF    (SHIFT_REG_USB3_7 = "111") THEN
+--       REG_USB3_7 <= '1';   
+--    ELSIF (SHIFT_REG_USB3_7 = "000") THEN   
+--       REG_USB3_7 <= '0';
+--    ELSE
+--       REG_USB3_7 <= REG_USB3_7;
+--    END IF;
+--    
+--    
+-- 
+-- END IF;
+-- END PROCESS OP_PHASER3;
+-- 
+-- OP_PHASER4 : PROCESS(RESET,CLOCK_200MHZ_270_DEG)
+-- BEGIN
+-- IF (RESET = '1') THEN
+--    DATA_PHASE_270    <= '0';
 --    USB4_6	         <= '0';
-ELSIF (CLOCK_200MHZ_000_DEG'EVENT  AND CLOCK_200MHZ_000_DEG='1') THEN
-   CLOCK_ENABLE_PHASER  <= CLOCK_ENABLE_PHASER(6 DOWNTO 0) & CLOCK_ENABLE_PHASER(7);
-   DATA_PHASE_000       <= CLOCK_ENABLE_PHASER(7);
-   USB1_6	         <= DATA_PHASE_000;
-
---    --COM PORT ENABLED
---    IF (SWITCH5 = '0') THEN
---       USB1_5  <= USBC_0;   --OUT
---    --NOT ENABLED   
---    ELSE
---       USB1_5  <= '1';   --OUT
---    END IF;
-   
-   SHIFT_REG_USB1_7           <= SHIFT_REG_USB1_7(1 DOWNTO 0) & USB1_7;
-   
-   IF    (SHIFT_REG_USB1_7 = "111") THEN
-      REG_USB1_7 <= '1';   
-   ELSIF (SHIFT_REG_USB1_7 = "000") THEN   
-      REG_USB1_7 <= '0';
-   ELSE
-      REG_USB1_7 <= REG_USB1_7;
-   END IF;
-   
---    USB2_6	         <= DATA_PHASE_000;
---    USB3_6	         <= DATA_PHASE_000;
---    USB4_6	         <= DATA_PHASE_000;
-   
-END IF;
-END PROCESS OP_PHASER1;
-
-
-OP_PHASER2 : PROCESS(RESET,CLOCK_200MHZ_090_DEG)
-BEGIN
-IF (RESET = '1') THEN
-   DATA_PHASE_090    <= '0';
-   USB2_6	         <= '0';
---    USB2_5            <= '1' ;   --OUT
-   SHIFT_REG_USB2_7  <= "111";
-   REG_USB2_7           <= '1';
+-- --    USB4_5            <= '1' ;   --OUT
+--    SHIFT_REG_USB4_7  <= "111";
 --    REG_USB4_7        <= '1';   
-
-ELSIF (CLOCK_200MHZ_090_DEG'EVENT  AND CLOCK_200MHZ_090_DEG='1') THEN
-   DATA_PHASE_090       <= DATA_PHASE_180_ADV1;
-   USB2_6	         <= DATA_PHASE_090;
-
---    --COM PORT ENABLED
---    IF (SWITCH5 = '0') THEN
---       USB2_5  <= USBC_8 ;   --OUT
---    --NOT ENABLED   
---    ELSE
---       USB2_5  <= '1' ;   --OUT
---    END IF;
-   
-   SHIFT_REG_USB2_7  <= SHIFT_REG_USB2_7(1 DOWNTO 0) & USB2_7;
-   
-   IF    (SHIFT_REG_USB2_7 = "111") THEN
-      REG_USB2_7 <= '1';   
-   ELSIF (SHIFT_REG_USB2_7 = "000") THEN   
-      REG_USB2_7 <= '0';
-   ELSE
-      REG_USB2_7 <= REG_USB2_7;
-   END IF;
-   
+-- 
+-- ELSIF (CLOCK_200MHZ_270_DEG'EVENT  AND CLOCK_200MHZ_270_DEG='1') THEN
+--    DATA_PHASE_270    <= DATA_PHASE_000;
+--    USB4_6	         <= DATA_PHASE_270;
+-- 
+-- --    --COM PORT ENABLED
+-- --    IF (SWITCH5 = '0') THEN
+-- --       USB4_5  <= USBC_24 ;   --OUT
+-- --    --NOT ENABLED   
+-- --    ELSE
+-- --       USB4_5  <= '1' ;   --OUT
+-- --    END IF;
+--    
+--    SHIFT_REG_USB4_7 <= SHIFT_REG_USB4_7(1 DOWNTO 0) & USB4_7;
+--    
 --    IF    (SHIFT_REG_USB4_7 = "111") THEN
 --       REG_USB4_7 <= '1';   
 --    ELSIF (SHIFT_REG_USB4_7 = "000") THEN   
@@ -486,85 +581,15 @@ ELSIF (CLOCK_200MHZ_090_DEG'EVENT  AND CLOCK_200MHZ_090_DEG='1') THEN
 --       REG_USB4_7 <= REG_USB4_7;
 --    END IF;
 --    
-END IF;
-END PROCESS OP_PHASER2;
-
-
-OP_PHASER3 : PROCESS(RESET,CLOCK_200MHZ_180_DEG)
-BEGIN
-IF (RESET = '1') THEN
-   DATA_PHASE_180_ADV1  <= '0';
-   DATA_PHASE_180       <= '0';
-   USB3_6	            <= '0';
---    USB3_5               <= '1';   --OUT
-   SHIFT_REG_USB3_7     <= "111";
-   REG_USB3_7           <= '1';   
-
-   
-ELSIF (CLOCK_200MHZ_180_DEG'EVENT  AND CLOCK_200MHZ_180_DEG='1') THEN
-   DATA_PHASE_180_ADV1  <= CLOCK_ENABLE_PHASER(7);
-   DATA_PHASE_180       <= DATA_PHASE_000;
-   USB3_6	         <= DATA_PHASE_180;
-
---    --COM PORT ENABLED
---    IF (SWITCH5 = '0') THEN
---       USB3_5  <= USBC_16;   --OUT
---    --NOT ENABLED   
---    ELSE
---       USB3_5  <= '1';   --OUT
---    END IF;  
-   
-   SHIFT_REG_USB3_7 <= SHIFT_REG_USB3_7(1 DOWNTO 0) & USB3_7;
-   
-   IF    (SHIFT_REG_USB3_7 = "111") THEN
-      REG_USB3_7 <= '1';   
-   ELSIF (SHIFT_REG_USB3_7 = "000") THEN   
-      REG_USB3_7 <= '0';
-   ELSE
-      REG_USB3_7 <= REG_USB3_7;
-   END IF;
-   
-   
-
-END IF;
-END PROCESS OP_PHASER3;
-
-OP_PHASER4 : PROCESS(RESET,CLOCK_200MHZ_270_DEG)
-BEGIN
-IF (RESET = '1') THEN
-   DATA_PHASE_270    <= '0';
-   USB4_6	         <= '0';
---    USB4_5            <= '1' ;   --OUT
-   SHIFT_REG_USB4_7  <= "111";
-   REG_USB4_7        <= '1';   
-
-ELSIF (CLOCK_200MHZ_270_DEG'EVENT  AND CLOCK_200MHZ_270_DEG='1') THEN
-   DATA_PHASE_270    <= DATA_PHASE_000;
-   USB4_6	         <= DATA_PHASE_270;
-
---    --COM PORT ENABLED
---    IF (SWITCH5 = '0') THEN
---       USB4_5  <= USBC_24 ;   --OUT
---    --NOT ENABLED   
---    ELSE
---       USB4_5  <= '1' ;   --OUT
---    END IF;
-   
-   SHIFT_REG_USB4_7 <= SHIFT_REG_USB4_7(1 DOWNTO 0) & USB4_7;
-   
-   IF    (SHIFT_REG_USB4_7 = "111") THEN
-      REG_USB4_7 <= '1';   
-   ELSIF (SHIFT_REG_USB4_7 = "000") THEN   
-      REG_USB4_7 <= '0';
-   ELSE
-      REG_USB4_7 <= REG_USB4_7;
-   END IF;
-   
-
-END IF;
-END PROCESS OP_PHASER4;
+-- 
+-- END IF;
+-- END PROCESS OP_PHASER4;
 
  
+USB1_6 <= CLOCK_25MHZ;
+USB2_6 <= CLOCK_25MHZ;
+USB3_6 <= CLOCK_25MHZ;
+USB4_6 <= CLOCK_25MHZ;
     
  
 
@@ -631,16 +656,19 @@ ELSIF (CLOCK_25MHZ'EVENT  AND CLOCK_25MHZ='1') THEN
 END IF;
 END PROCESS RST;
 
+
 RESET <= NOT RESET_N;
 
-FLASH_VAL : PROCESS(SWITCH5)
+                 
+FLASH_VAL : PROCESS(SWITCH_5_4)
 BEGIN
-   IF (SWITCH5 = '0') THEN
-      FLASHER_COUNT <= 25000000;
-   ELSE
-      FLASHER_COUNT <= 12500000;
-   END IF;
-   
+   CASE SWITCH_5_4 IS
+      WHEN "00"    => FLASHER_COUNT <=  6250000;
+      WHEN "01"    => FLASHER_COUNT <= 12500000;
+      WHEN "10"    => FLASHER_COUNT <= 25000000;
+      WHEN  OTHERS => FLASHER_COUNT <= 50000000;
+   END CASE;
+
 END PROCESS FLASH_VAL;
 
 --
@@ -653,11 +681,16 @@ TCK : FLASHER
       COUNT 		=> FLASHER_COUNT  ,
 		FLASHOUT		=> FLASH
 		);
+
+
+SWITCH_5_4 <= SWITCH5 & SWITCH4;
+
 --
 CGEN : CLOCKGEN_CONTROLLER
   PORT MAP( 
-		CLOCK				=> CLOCK_25MHZ,
-      RST_N       	=> RESET_N,
+		CLOCK				=> CLOCK_25MHZ    ,
+      RST_N       	=> RESET_N        ,
+      SWITCH_5_4     => SWITCH_5_4     ,
       CLK_SCLK    	=> CLK_SCLK,
       CLK_SDAT    	=> CLK_SDAT,
 		IDT_SCLK     	=> OPEN,   
@@ -799,14 +832,19 @@ CGEN : CLOCKGEN_CONTROLLER
 --       S 	=> SWITCH5
 --    );
 --
---    BGMUX_ON_OFF : BUFGMUX
---    port map (
---       O 	=>	GCLOCK,    
---       I0 =>	CLK100,
---       I1 => '0',  
---       S 	=> CLOCK_STOP
---    );
---
+   BGMUX_ON_OFF : BUFGMUX
+   port map (
+      O 	=>	GCLOCK,    
+      I0 =>	CLK_180MHZ_210MHZ,
+      I1 => '0',  
+      S 	=> CLOCK_STOP
+   );
+
+
+
+
+
+
 SPI_ACCESS_inst : SPI_ACCESS
    generic map (
       SIM_DELAY_TYPE => "SCALED",
@@ -866,15 +904,15 @@ LBACK: LOOPBACK_TEST
 --
 -- ENABLE LOOPBACKS WHEN SWITCH4 = 1
 --
-      LOOPIN1		<= UP1 WHEN SWITCH4 = '1' ELSE '0';
-		LOOPIN2		<= UP2 WHEN SWITCH4 = '1' ELSE '0';
-		LOOPIN3		<= UP3 WHEN SWITCH4 = '1' ELSE '0';
-		LOOPIN4		<= UP4 WHEN SWITCH4 = '1' ELSE '0';
+      LOOPIN1		<= UP1;-- WHEN SWITCH4 = '1' ELSE '0';
+		LOOPIN2		<= UP2;-- WHEN SWITCH4 = '1' ELSE '0';
+		LOOPIN3		<= UP3;-- WHEN SWITCH4 = '1' ELSE '0';
+		LOOPIN4		<= UP4;-- WHEN SWITCH4 = '1' ELSE '0';
 --       DOWN1 	   <= LOOPOUT1 WHEN SWITCH4 = '1' ELSE 'Z';
 --       DOWN2   	   <= LOOPOUT2 WHEN SWITCH4 = '1' ELSE 'Z';
 --       DOWN3	      <= LOOPOUT3 WHEN SWITCH4 = '1' ELSE 'Z';
 --       DOWN4	      <= LOOPOUT4 WHEN SWITCH4 = '1' ELSE 'Z';
-		LED			<= FLASH WHEN SWITCH4 = '0' ELSE LOOPBACK_PASS;
+		LED			<= FLASH;-- WHEN SWITCH4 = '0' ELSE LOOPBACK_PASS;
 --
 -- ENABLE THE 3V3 WHEN ANY OF THE 1V2'S ARE ENABLED
 --
@@ -898,10 +936,10 @@ LBACK: LOOPBACK_TEST
 -- # NET "extminer_rxd_PIN[0]"  LOC = F1;   #INPUT   USB8
    
    
-MUX1 : PROCESS(USBC_0,USBC_8,USBC_16,USBC_24,SWITCH8)
+MUX1 : PROCESS(USBC_0,USBC_8,USBC_16,USBC_24,SWITCH3)
 BEGIN
    --COM PORT ENABLED
-   IF (SWITCH5 = '0') THEN
+   IF (SWITCH3 = '0') THEN
       --PRIMARY SERIAL COMS TO ARRAY
       USB1_5  <= USBC_0;   --OUT
       USB2_5  <= USBC_8 ;   --OUT
@@ -1012,7 +1050,7 @@ END PROCESS MUX1;
    
    
    
-MUX2 : PROCESS(USB1_7,USB2_7,USB3_7,USB4_7,SWITCH8)
+MUX2 : PROCESS(USB1_7,USB2_7,USB3_7,USB4_7,SWITCH3)
 BEGIN
    --COM PORT ENABLED
    IF (SWITCH3 = '0') THEN
@@ -1068,24 +1106,24 @@ USBC_2		<= JTAG_TDO    WHEN (SWITCH3 = '1') ELSE '1';
 --
 -- USE TO GUARD CLOCKS
 --
-USB1_8	<= '0';
-USB2_8	<= '0';
-USB3_8	<= '0';
-USB4_8	<= '0';
+USB1_8	<= 'Z';
+USB2_8	<= 'Z';
+USB3_8	<= 'Z';
+USB4_8	<= 'Z';
 --
 -- USE TO GUARD RX & TX LINES
 --
-USB1_4	<= '0';
-USB2_1	<= '0';
-USB3_4	<= '0';
-USB4_1	<= '0';
+USB1_4	<= 'Z';
+USB2_1	<= 'Z';
+USB3_4	<= 'Z';
+USB4_1	<= 'Z';
 
 -- USB1_6	<= '0';
 -- USB2_6	<= '0';
 -- USB3_6	<= '0';
 -- USB4_6	<= '0';
 --
-divide1 : PROCESS(RESET,CLK50)
+divide1 : PROCESS(RESET,CLOCK_25MHZ)
 BEGIN
 IF (RESET = '1') THEN
    CLOCK_DIVIDE_COUNTER <= 24999; 
@@ -1093,9 +1131,9 @@ IF (RESET = '1') THEN
    CLOCK_1KHZ           <= '0';   
    JTAG_TMS_EXTENDER    <= "0000"; 
    
-ELSIF (CLK50'event  AND CLK50='1') THEN
+ELSIF (CLOCK_25MHZ'event  AND CLOCK_25MHZ='1') THEN
    IF (CLOCK_DIVIDE_COUNTER = 0) THEN
-      CLOCK_DIVIDE_COUNTER <= 24999; 
+      CLOCK_DIVIDE_COUNTER <= 12499; 
       TOGGLE_1KHZ          <= '1';  
    ELSE
       CLOCK_DIVIDE_COUNTER <= CLOCK_DIVIDE_COUNTER -1; 
@@ -1175,17 +1213,21 @@ END PROCESS TURNON;
 
 
 --WANT RESETS APPLIED AFTER FPGAS ARE CONFIGURED
-RESET_DEVICE_0 <= RESET_FROM_COUNT;--  OR POWER_STARTUP_N(14) OR JTAG_TMS_EXTENDER(3) OR DCM_NOT_LOCKED;
-RESET_DEVICE_1 <= RESET_FROM_COUNT;--  OR POWER_STARTUP_N(13) OR JTAG_TMS_EXTENDER(3) OR DCM_NOT_LOCKED;
-RESET_DEVICE_2 <= RESET_FROM_COUNT;--  OR POWER_STARTUP_N(12) OR JTAG_TMS_EXTENDER(3) OR DCM_NOT_LOCKED;
-RESET_DEVICE_3 <= RESET_FROM_COUNT;--  OR POWER_STARTUP_N(11) OR JTAG_TMS_EXTENDER(3) OR DCM_NOT_LOCKED;
+RESET_DEVICE_0 <= RESET_FROM_COUNT  OR POWER_STARTUP_N(14) OR JTAG_TMS_EXTENDER(3);-- OR DCM_NOT_LOCKED;
+RESET_DEVICE_1 <= RESET_FROM_COUNT  OR POWER_STARTUP_N(13) OR JTAG_TMS_EXTENDER(3);-- OR DCM_NOT_LOCKED;
+RESET_DEVICE_2 <= RESET_FROM_COUNT  OR POWER_STARTUP_N(12) OR JTAG_TMS_EXTENDER(3);-- OR DCM_NOT_LOCKED;
+RESET_DEVICE_3 <= RESET_FROM_COUNT  OR POWER_STARTUP_N(11) OR JTAG_TMS_EXTENDER(3);-- OR DCM_NOT_LOCKED;
 
 
 ARRAY_3V3_EN	<= POWER_STARTUP_N(0);     -- ON = SUPPLY ON
-EN_1V2_1			<= POWER_STARTUP_N(10);		-- ON = SUPPLY ON
-EN_1V2_2			<= POWER_STARTUP_N(7);		-- ON = SUPPLY ON
-EN_1V2_3			<= POWER_STARTUP_N(4);		-- ON = SUPPLY ON
+EN_1V2_1			<= POWER_STARTUP_N(7);		-- ON = SUPPLY ON
+EN_1V2_2			<= POWER_STARTUP_N(5);		-- ON = SUPPLY ON
+EN_1V2_3			<= POWER_STARTUP_N(3);		-- ON = SUPPLY ON
 EN_1V2_4			<= POWER_STARTUP_N(1);		-- ON = SUPPLY ON
+-- EN_1V2_1			<= '1';		-- ON = SUPPLY ON
+-- EN_1V2_2			<= '1';		-- ON = SUPPLY ON
+-- EN_1V2_3			<= '1';		-- ON = SUPPLY ON
+-- EN_1V2_4			<= '1';		-- ON = SUPPLY ON
 
 FAN1 : PROCESS(RESET,CLOCK_25MHZ)
 BEGIN
@@ -1307,37 +1349,63 @@ END PROCESS FAN1;
           
           
 
+-- CLKOP1 : OBUFDS
+-- generic map(IOSTANDARD  => "DEFAULT"   )
+-- port map(   O           => CLOCKS1_2   ,     -- Diff_p output (connect directly to top-level port)
+--             OB          => CLOCKS1_1   ,     -- Diff_n output (connect directly to top-level port)
+--             I           => CLOCK_200MHZ_000_DEG );    -- Buffer input 
+-- 
+-- 
+-- CLKOP2 : OBUFDS
+-- generic map(IOSTANDARD  => "DEFAULT"   )
+-- port map(   O           => CLOCKS2_2   ,     -- Diff_p output (connect directly to top-level port)
+--             OB          => CLOCKS2_1   ,     -- Diff_n output (connect directly to top-level port)
+--             I           => CLOCK_200MHZ_090_DEG );--CLOCK_200MHZ_090_DEG );    -- Buffer input 
+-- 
+-- CLKOP3 : OBUFDS
+-- generic map(IOSTANDARD  => "DEFAULT"   )
+-- port map(   O           => CLOCKS3_2   ,     -- Diff_p output (connect directly to top-level port)
+--             OB          => CLOCKS3_1   ,     -- Diff_n output (connect directly to top-level port)
+--             I           => CLOCK_200MHZ_180_DEG );--CLOCK_200MHZ_180_DEG );    -- Buffer input 
+-- 
+-- CLKOP4 : OBUFDS
+-- generic map(IOSTANDARD  => "DEFAULT"   )
+-- port map(   O           => CLOCKS4_2   ,     -- Diff_p output (connect directly to top-level port)
+--             OB          => CLOCKS4_1   ,     -- Diff_n output (connect directly to top-level port)
+--             I           => CLOCK_200MHZ_270_DEG );--CLOCK_200MHZ_270_DEG );    -- Buffer input 
+
 CLKOP1 : OBUFDS
 generic map(IOSTANDARD  => "DEFAULT"   )
 port map(   O           => CLOCKS1_2   ,     -- Diff_p output (connect directly to top-level port)
             OB          => CLOCKS1_1   ,     -- Diff_n output (connect directly to top-level port)
-            I           => CLOCK_200MHZ_000_DEG );    -- Buffer input 
-
+            I           => GCLOCK );    -- Buffer input 
+                               
 
 CLKOP2 : OBUFDS
 generic map(IOSTANDARD  => "DEFAULT"   )
 port map(   O           => CLOCKS2_2   ,     -- Diff_p output (connect directly to top-level port)
             OB          => CLOCKS2_1   ,     -- Diff_n output (connect directly to top-level port)
-            I           => CLOCK_200MHZ_090_DEG );--CLOCK_200MHZ_090_DEG );    -- Buffer input 
+            I           => GCLOCK );--CLOCK_200MHZ_090_DEG );    -- Buffer input 
 
 CLKOP3 : OBUFDS
 generic map(IOSTANDARD  => "DEFAULT"   )
 port map(   O           => CLOCKS3_2   ,     -- Diff_p output (connect directly to top-level port)
             OB          => CLOCKS3_1   ,     -- Diff_n output (connect directly to top-level port)
-            I           => CLOCK_200MHZ_180_DEG );--CLOCK_200MHZ_180_DEG );    -- Buffer input 
+            I           => GCLOCK );--CLOCK_200MHZ_180_DEG );    -- Buffer input 
 
 CLKOP4 : OBUFDS
 generic map(IOSTANDARD  => "DEFAULT"   )
 port map(   O           => CLOCKS4_2   ,     -- Diff_p output (connect directly to top-level port)
             OB          => CLOCKS4_1   ,     -- Diff_n output (connect directly to top-level port)
-            I           => CLOCK_200MHZ_270_DEG );--CLOCK_200MHZ_270_DEG );    -- Buffer input 
+            I           => GCLOCK );--CLOCK_200MHZ_270_DEG );    -- Buffer input 
 
 
 
-DOWN1	<= CLK50		;   
-DOWN2	<= CLK100	;		 
-DOWN3	<= CLK150	;		 
-DOWN4	<= CLKIN_IBUFG_OUT	;		
+
+DOWN1	<= CLK_180MHZ_210MHZ	;   
+DOWN2	<= CLK_180MHZ_210MHZ	;		 
+DOWN3	<= CLK_180MHZ_210MHZ	;		 
+DOWN4	<= CLK_180MHZ_210MHZ	;		
            
 END RTL;
 

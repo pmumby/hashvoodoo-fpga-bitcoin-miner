@@ -1,0 +1,9 @@
+run
+-ifmt MIXED
+-top dcm_25_175_exdes
+-p xc6slx150-fgg484-2
+-ifn xst.prj
+-ofn dcm_25_175_exdes
+-keep_hierarchy soft 
+-equivalent_register_removal no 
+-max_fanout 65535

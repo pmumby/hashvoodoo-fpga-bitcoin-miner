@@ -134,11 +134,11 @@ module dcm_25_175
   //-----------------------------------
   BUFG clkf_buf
    (.O (clkfb),
-    .I (clk0));
+    .I (clkfx));
 
   BUFG clkout1_buf
    (.O   (CLK_HASH),
-    .I   (clkfx));
+    .I   (clk0));
 
 
 

@@ -18,7 +18,7 @@ module fpgaminer_top (
 
 	//Parameters:
 	//================================================
-	parameter HASH_CLOCK_RATE = 200000000;			//Hasher Clock Output from Controller in Hz
+	//parameter HASH_CLOCK_RATE = 200000000;			//Hasher Clock Output from Controller in Hz
 	parameter COMM_CLOCK_RATE = 25000000;			//Communications Clock Output from Controller in Hz
 	parameter UART_BAUD_RATE = 115200;				//Baud Rate to use for UART (BPS)
 	parameter UART_SAMPLE_POINT = 8;					//Point in the oversampled wave to sample the bit state for the UART (6-12 should be valid)
@@ -41,6 +41,7 @@ module fpgaminer_top (
 	//================================================
 	reg reset;								//Actual Reset Signal
 	wire hash_clk_buf,comm_clk_buf;	//Actually Used Clock Signals
+	wire hash_clk_dcm;					//Output of hash clock DCM
 	wire clock_flash;						//Flasher output (24bit divider of clock)
 	wire miner_busy;						//Miner Busy Flag
    wire [32:0] slave_nonces;			//Nonce found by worker TODO: Rename/Cleanup (this is a holdover from the icarus pair code)
@@ -61,9 +62,9 @@ module fpgaminer_top (
 	//================================================
 	assign new_nonces = new_ticket;					//TODO: Cleanup
 	assign led[0] = led_nonce_fade;					//LED0 (Green): New Nonce Beacon (fader)
-   assign led[1] = clock_flash;						//LED1 (Red): Clock Heartbeat (blinks to indicate working input clock)
+	assign led[1] = clock_flash;						//LED1 (Red): Clock Heartbeat (blinks to indicate working input clock)
 	assign led[2] = (~TxD || ~RxD);					//LED2 (Blue): UART Activity (blinks on either rx or tx)
- 	assign led[3] = ~miner_busy;						//LED3 (Amber): Idle Indicator. Lights when miner has nothing to do.
+	assign led[3] = ~miner_busy;						//LED3 (Amber): Idle Indicator. Lights when miner has nothing to do.
 
 	//Module Instantiation:
 	//================================================
@@ -83,7 +84,14 @@ module fpgaminer_top (
 			.I(hash_clk_p),	//Diff_p clock input
 			.IB(hash_clk_n)	//Diff_n clock input
 		);
-			
+	
+	//Hash Clock DCM
+	dcm_25_175 DCM7X (
+			.CLK_OSC(hash_clk_buf), 
+			.CLK_HASH(hash_clk_dcm)
+		);
+
+	
 	//Hub core, this is a holdover from Icarus. This should be cleaned up and ported back to core logic, since miners are now "solo".
 	//TODO: Cleanup old icarus stuff
    hub_core #(
@@ -116,8 +124,8 @@ module fpgaminer_top (
 		
 	//Main Hashing Core, This does all the work
 	sha256_top M (
-			.clk(hash_clk_buf), 
-			.rst(reset), 
+			.clk(hash_clk_dcm), 
+			.rst(0), //Tied low for now, to weed out bugs.
 			.midstate(midstate), 
 			.data2(data2), 
 			.golden_nonce(slave_nonces[31:0]), 
@@ -130,7 +138,7 @@ module fpgaminer_top (
 	flasher #(
 			.BITS(CLOCK_FLASH_BITS)
 		) CLK_FLASH (
-			.clk(hash_clk_buf),
+			.clk(hash_clk_dcm),
 			.flash(clock_flash)
 		);
 	

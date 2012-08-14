@@ -26,13 +26,13 @@ NET "reset_b" LOC = "D1" |IOSTANDARD = "LVCMOS33";
 NET "reset_select" LOC = "D7" |PULLUP |IOSTANDARD = "LVCMOS33";
 
 # Input Clocks from Controller
-NET "hash_clk_buf" TNM_NET = hash_clk_buf;
+NET "hash_clk_dcm" TNM_NET = hash_clk_dcm;
 NET "comm_clk" TNM_NET = comm_clk;
-TIMESPEC TS_hash_clk_buf = PERIOD "hash_clk_buf" 180 MHz HIGH 50 %;
+TIMESPEC TS_hash_clk_dcm = PERIOD "hash_clk_dcm" 175 MHz HIGH 50 %;
 TIMESPEC TS_comm_clk = PERIOD "comm_clk" 25 MHz HIGH 50 %;
 
 # Various Timing Ignores
-NET "hash_clk_buf" TNM_NET =  FFS "GRP_HASH";
+NET "hash_clk_dcm" TNM_NET =  FFS "GRP_HASH";
 NET "comm_clk" TNM_NET =  FFS "GRP_COMM";
 TIMESPEC TS_Boundry1 = FROM "GRP_HASH" TO "GRP_COMM" TIG ;
 TIMESPEC TS_Boundry2 = FROM "GRP_COMM" TO "GRP_HASH" TIG ;

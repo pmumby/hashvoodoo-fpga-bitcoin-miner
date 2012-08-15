@@ -23,7 +23,7 @@ module fpgaminer_top (
 	parameter DCM_MULTIPLIER_CAP = 64;				//Max Point Allowed for DCM multiplier (Safety ceiling)
 	parameter UART_BAUD_RATE = 115200;				//Baud Rate to use for UART (BPS)
 	parameter UART_SAMPLE_POINT = 8;					//Point in the oversampled wave to sample the bit state for the UART (6-12 should be valid)
-	parameter CLOCK_FLASH_BITS = 28;					//Number of bits for divider of flasher. (28bit = approx 134M Divider)
+	parameter CLOCK_FLASH_BITS = 26;					//Number of bits for divider of flasher. (28bit = approx 67M Divider)
 	
 	//IO Definitions:
 	//================================================
@@ -59,7 +59,6 @@ module fpgaminer_top (
 	reg [3:0]ticket_CS = 4'b0001;		//Again... Cleanup
 	reg [3:0]ticket_NS;					//Again... Cleanup
 	wire dcm_prog_en;
-	wire dcm_prog_clk;
 	wire dcm_prog_data;
 	wire dcm_prog_done;
 	wire dcm_valid;
@@ -100,7 +99,7 @@ module fpgaminer_top (
 			.CLK_VALID(dcm_valid),
 			.CLK_OSC(hash_clk_buf), 
 			.CLK_HASH(hash_clk_dcm),
-			.PROGCLK(dcm_prog_clk),
+			.PROGCLK(comm_clk_buf),
 			.PROGDATA(dcm_prog_data),
 			.PROGEN(dcm_prog_en),
 			.PROGDONE(dcm_prog_done)
@@ -115,7 +114,7 @@ module fpgaminer_top (
 			.data2(data2),
 			.midstate(midstate),
 			.start(start_mining),
-			.dcm_prog_clk(dcm_prog_clk),
+			.dcm_prog_clk(comm_clk_buf),
 			.dcm_prog_en(dcm_prog_en),
 			.dcm_prog_data(dcm_prog_data),
 			.dcm_prog_done(dcm_prog_done)

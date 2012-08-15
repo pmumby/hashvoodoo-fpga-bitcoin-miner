@@ -78,7 +78,7 @@ module dcm_controller (
 					cmd_latch_data <= cmd_data;
 					busy <= 1; //Flag we're busy										
 				end
-			if(busy)
+			else if(busy)
 				begin
 					//We're busy, so lets handle our command:
 					if(cmd_latch_id==8'd0 && dcm_progstate == 5'd31) //Set Clock
@@ -90,52 +90,50 @@ module dcm_controller (
 							else
 								dcm_multiplier <= cmd_latch_data;
 							dcm_prog_ready <= 1;
+							busy <= 0;
 						end
 				end
-		end
-	
-	//DCM Programming logic
-	//Mostly copied from https://github.com/progranism/Open-Source-FPGA-Bitcoin-Miner
-	//Adapted to our specific setup
-	always @ (posedge clk)
-		begin
-			if (dcm_multiplier != current_dcm_multiplier && dcm_progstate == 5'd31 && dcm_prog_ready)
-			begin
-				current_dcm_multiplier <= dcm_multiplier;
-				dcm_progstate <= 5'd0;
-				// DCM expects D-1 and M-1
-				dcm_data <= {dcm_multiplier_s1, dcm_divider_s1};
-				dcm_prog_ready <= 0;
-			end
-
-			if (dcm_progstate == 5'd0) {dcm_prog_en, dcm_prog_data} <= 2'b11;
-			if (dcm_progstate == 5'd1) {dcm_prog_en, dcm_prog_data} <= 2'b10;
-			if ((dcm_progstate >= 5'd2 && dcm_progstate <= 5'd9) || (dcm_progstate >= 5'd15 && dcm_progstate <= 5'd22))
-			begin
-				dcm_prog_data <= dcm_data[0];
-				dcm_data <= {1'b0, dcm_data[15:1]};
-			end
-
-			if (dcm_progstate == 5'd10) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-			if (dcm_progstate == 5'd11) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-			if (dcm_progstate == 5'd12) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-
-			if (dcm_progstate == 5'd13) {dcm_prog_en, dcm_prog_data} <= 2'b11;
-			if (dcm_progstate == 5'd14) {dcm_prog_en, dcm_prog_data} <= 2'b11;
-
-			if (dcm_progstate == 5'd23) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-			if (dcm_progstate == 5'd24) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-			if (dcm_progstate == 5'd25) {dcm_prog_en, dcm_prog_data} <= 2'b10;
-			if (dcm_progstate == 5'd26) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-
-			if (dcm_progstate <= 5'd25) dcm_progstate <= dcm_progstate + 5'd1;
-
-			if (dcm_progstate == 5'd26 && dcm_prog_done)
+			else
 				begin
-					dcm_progstate <= 5'd31;
-					busy <= 0;
-				end
+					//DCM Programming logic
+					//Mostly copied from https://github.com/progranism/Open-Source-FPGA-Bitcoin-Miner
+					//Adapted to our specific setup
 
-		end	
-	
+					if (dcm_multiplier != current_dcm_multiplier && dcm_progstate == 5'd31 && dcm_prog_ready)
+					begin
+						current_dcm_multiplier <= dcm_multiplier;
+						dcm_progstate <= 5'd0;
+						// DCM expects D-1 and M-1
+						dcm_data <= {dcm_multiplier_s1, dcm_divider_s1};
+						dcm_prog_ready <= 0;
+					end
+
+					if (dcm_progstate == 5'd0) {dcm_prog_en, dcm_prog_data} <= 2'b11;
+					if (dcm_progstate == 5'd1) {dcm_prog_en, dcm_prog_data} <= 2'b10;
+					if ((dcm_progstate >= 5'd2 && dcm_progstate <= 5'd9) || (dcm_progstate >= 5'd15 && dcm_progstate <= 5'd22))
+					begin
+						dcm_prog_data <= dcm_data[0];
+						dcm_data <= {1'b0, dcm_data[15:1]};
+					end
+
+					if (dcm_progstate == 5'd10) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+					if (dcm_progstate == 5'd11) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+					if (dcm_progstate == 5'd12) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+
+					if (dcm_progstate == 5'd13) {dcm_prog_en, dcm_prog_data} <= 2'b11;
+					if (dcm_progstate == 5'd14) {dcm_prog_en, dcm_prog_data} <= 2'b11;
+
+					if (dcm_progstate == 5'd23) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+					if (dcm_progstate == 5'd24) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+					if (dcm_progstate == 5'd25) {dcm_prog_en, dcm_prog_data} <= 2'b10;
+					if (dcm_progstate == 5'd26) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+
+					if (dcm_progstate <= 5'd25) dcm_progstate <= dcm_progstate + 5'd1;
+
+					if (dcm_progstate == 5'd26 && dcm_prog_done)
+						dcm_progstate <= 5'd31;
+
+				end			
+		end
+
 endmodule

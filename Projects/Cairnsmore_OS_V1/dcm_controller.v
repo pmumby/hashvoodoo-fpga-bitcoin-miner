@@ -57,8 +57,8 @@ module dcm_controller (
 	//================================================
 	assign cmd_trigger_timestamp = data2[63:32];
 	assign cmd_id = data2[71:64];
-	assign cmd_data = data2[87:72];
-	assign cmd_validator = data2[95:88];
+	assign cmd_data = data2[79:72];
+	assign cmd_validator = data2[87:80];
 	assign cmd_trigger = (cmd_trigger_timestamp == 32'hffffffff) && (midstate == 256'd0);
 	assign cmd_valid = cmd_validator == ^(cmd_id + cmd_data);
 	
@@ -82,7 +82,7 @@ module dcm_controller (
 			if(busy)
 				begin
 					//We're busy, so lets handle our command:
-					if(cmd_latch_data==8'd0) //Set Clock
+					if(cmd_latch_id==8'd0) //Set Clock
 						begin
 							dcm_multiplier <= cmd_latch_data;
 							dcm_prog_ready <= 1;

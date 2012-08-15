@@ -18,8 +18,9 @@ module fpgaminer_top (
 
 	//Parameters:
 	//================================================
-	//parameter HASH_CLOCK_RATE = 200000000;			//Hasher Clock Output from Controller in Hz
 	parameter COMM_CLOCK_RATE = 25000000;			//Communications Clock Output from Controller in Hz
+	parameter DCM_MULTIPLIER_START = 32;			//Starting point for DCM multiplier (25Mhz/8 input x 32 = 100Mhz)
+	parameter DCM_MULTIPLIER_CAP = 64;				//Max Point Allowed for DCM multiplier (Safety ceiling)
 	parameter UART_BAUD_RATE = 115200;				//Baud Rate to use for UART (BPS)
 	parameter UART_SAMPLE_POINT = 8;					//Point in the oversampled wave to sample the bit state for the UART (6-12 should be valid)
 	parameter CLOCK_FLASH_BITS = 28;					//Number of bits for divider of flasher. (28bit = approx 134M Divider)
@@ -57,12 +58,20 @@ module fpgaminer_top (
 	reg new_ticket;						//Related to got_ticket TODO: Cleanup old icarus stuff
 	reg [3:0]ticket_CS = 4'b0001;		//Again... Cleanup
 	reg [3:0]ticket_NS;					//Again... Cleanup
+	wire dcm_prog_en;
+	wire dcm_prog_clk;
+	wire dcm_prog_data;
+	wire dcm_prog_done;
+	wire dcm_valid;
+	wire dcm_reset;
 	
 	//Assignments:
 	//================================================
 	assign new_nonces = new_ticket;					//TODO: Cleanup
 	assign led[0] = led_nonce_fade;					//LED0 (Green): New Nonce Beacon (fader)
-	assign led[1] = clock_flash;						//LED1 (Red): Clock Heartbeat (blinks to indicate working input clock)
+	assign led[1] = (clock_flash || ~dcm_valid);	//LED1 (Red): Clock Heartbeat (blinks to indicate working input clock)
+																//		Off = no clock
+																//		On Solid = dcm invalid.
 	assign led[2] = (~TxD || ~RxD);					//LED2 (Blue): UART Activity (blinks on either rx or tx)
 	assign led[3] = ~miner_busy;						//LED3 (Amber): Idle Indicator. Lights when miner has nothing to do.
 
@@ -85,12 +94,32 @@ module fpgaminer_top (
 			.IB(hash_clk_n)	//Diff_n clock input
 		);
 	
-	//Hash Clock DCM
-	dcm_25_175 DCM7X (
+	//Dynamically Programmable Hash Clock DCM
+	main_dcm MAINDCM (
+			.RESET(dcm_reset),
+			.CLK_VALID(dcm_valid),
 			.CLK_OSC(hash_clk_buf), 
-			.CLK_HASH(hash_clk_dcm)
+			.CLK_HASH(hash_clk_dcm),
+			.PROGCLK(dcm_prog_clk),
+			.PROGDATA(dcm_prog_data),
+			.PROGEN(dcm_prog_en),
+			.PROGDONE(dcm_prog_done)
 		);
-
+	
+	//DCM Controller Core (controls dcm clock based on special (malformed) icarus work packets which act as "command" packets
+	dcm_controller #(
+			.MAXIMUM_MULTIPLIER(DCM_MULTIPLIER_CAP),
+			.INITIAL_MULTIPLIER(DCM_MULTIPLIER_START)
+		) DCM_CONTROL (
+			.clk(comm_clk_buf),
+			.data2(data2),
+			.midstate(midstate),
+			.start(start_mining),
+			.dcm_prog_clk(dcm_prog_clk),
+			.dcm_prog_en(dcm_prog_en),
+			.dcm_prog_data(dcm_prog_data),
+			.dcm_prog_done(dcm_prog_done)
+		);
 	
 	//Hub core, this is a holdover from Icarus. This should be cleaned up and ported back to core logic, since miners are now "solo".
 	//TODO: Cleanup old icarus stuff

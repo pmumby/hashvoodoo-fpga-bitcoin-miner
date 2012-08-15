@@ -28,7 +28,7 @@ NET "reset_select" LOC = "D7" |PULLUP |IOSTANDARD = "LVCMOS33";
 # Input Clocks from Controller
 NET "hash_clk_dcm" TNM_NET = hash_clk_dcm;
 NET "comm_clk" TNM_NET = comm_clk;
-TIMESPEC TS_hash_clk_dcm = PERIOD "hash_clk_dcm" 175 MHz HIGH 50 %;
+TIMESPEC TS_hash_clk_dcm = PERIOD "hash_clk_dcm" 200 MHz HIGH 50 %;
 TIMESPEC TS_comm_clk = PERIOD "comm_clk" 25 MHz HIGH 50 %;
 
 # Various Timing Ignores

@@ -60,7 +60,7 @@ module dcm_controller (
 	assign cmd_data = data2[79:72];
 	assign cmd_validator = data2[87:80];
 	assign cmd_trigger = (cmd_trigger_timestamp == 32'hffffffff) && (midstate == 256'd0);
-	assign cmd_valid = cmd_validator == ^(cmd_id + cmd_data);
+	assign cmd_valid = cmd_validator == (cmd_id ^ cmd_data);
 	
 	//Toplevel Logic:
 	//================================================

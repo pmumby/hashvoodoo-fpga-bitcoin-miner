@@ -108,29 +108,29 @@ module dcm_controller (
 				dcm_prog_ready <= 0;
 			end
 
-			if (dcm_progstate == 5'd0) {tx_dcm_progen, tx_dcm_progdata} <= 2'b11;
-			if (dcm_progstate == 5'd1) {tx_dcm_progen, tx_dcm_progdata} <= 2'b10;
+			if (dcm_progstate == 5'd0) {dcm_prog_en, dcm_prog_data} <= 2'b11;
+			if (dcm_progstate == 5'd1) {dcm_prog_en, dcm_prog_data} <= 2'b10;
 			if ((dcm_progstate >= 5'd2 && dcm_progstate <= 5'd9) || (dcm_progstate >= 5'd15 && dcm_progstate <= 5'd22))
 			begin
-				tx_dcm_progdata <= dcm_data[0];
+				dcm_prog_data <= dcm_data[0];
 				dcm_data <= {1'b0, dcm_data[15:1]};
 			end
 
-			if (dcm_progstate == 5'd10) {tx_dcm_progen, tx_dcm_progdata} <= 2'b00;
-			if (dcm_progstate == 5'd11) {tx_dcm_progen, tx_dcm_progdata} <= 2'b00;
-			if (dcm_progstate == 5'd12) {tx_dcm_progen, tx_dcm_progdata} <= 2'b00;
+			if (dcm_progstate == 5'd10) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+			if (dcm_progstate == 5'd11) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+			if (dcm_progstate == 5'd12) {dcm_prog_en, dcm_prog_data} <= 2'b00;
 
-			if (dcm_progstate == 5'd13) {tx_dcm_progen, tx_dcm_progdata} <= 2'b11;
-			if (dcm_progstate == 5'd14) {tx_dcm_progen, tx_dcm_progdata} <= 2'b11;
+			if (dcm_progstate == 5'd13) {dcm_prog_en, dcm_prog_data} <= 2'b11;
+			if (dcm_progstate == 5'd14) {dcm_prog_en, dcm_prog_data} <= 2'b11;
 
-			if (dcm_progstate == 5'd23) {tx_dcm_progen, tx_dcm_progdata} <= 2'b00;
-			if (dcm_progstate == 5'd24) {tx_dcm_progen, tx_dcm_progdata} <= 2'b00;
-			if (dcm_progstate == 5'd25) {tx_dcm_progen, tx_dcm_progdata} <= 2'b10;
-			if (dcm_progstate == 5'd26) {tx_dcm_progen, tx_dcm_progdata} <= 2'b00;
+			if (dcm_progstate == 5'd23) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+			if (dcm_progstate == 5'd24) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+			if (dcm_progstate == 5'd25) {dcm_prog_en, dcm_prog_data} <= 2'b10;
+			if (dcm_progstate == 5'd26) {dcm_prog_en, dcm_prog_data} <= 2'b00;
 
 			if (dcm_progstate <= 5'd25) dcm_progstate <= dcm_progstate + 5'd1;
 
-			if (dcm_progstate == 5'd26 && rx_dcm_progdone)
+			if (dcm_progstate == 5'd26 && dcm_prog_done)
 				begin
 					dcm_progstate <= 5'd31;
 					busy <= 0;

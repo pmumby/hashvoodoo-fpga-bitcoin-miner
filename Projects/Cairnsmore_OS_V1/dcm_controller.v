@@ -47,10 +47,9 @@ module dcm_controller (
 	reg dcm_prog_ready;
 	reg [7:0] dcm_multiplier = INITIAL_MULTIPLIER;
 	reg [7:0] current_dcm_multiplier = 8'd0;
-	reg [15:0] dcm_config_buf;
 	reg [4:0] dcm_progstate = 5'd31;
 	reg [15:0] dcm_data;
-	wire [7:0] dcm_divider_s1 = 8'd8;
+	wire [7:0] dcm_divider_s1 = 7'd8;
 	wire [7:0] dcm_multiplier_s1 = dcm_multiplier - 8'd1;
 	
 	//Assignments:
@@ -82,7 +81,7 @@ module dcm_controller (
 			if(busy)
 				begin
 					//We're busy, so lets handle our command:
-					if(cmd_latch_id==8'd0) //Set Clock
+					if(cmd_latch_id==8'd0 && dcm_progstate == 5'd31) //Set Clock
 						begin
 							dcm_multiplier <= cmd_latch_data;
 							dcm_prog_ready <= 1;
@@ -95,9 +94,9 @@ module dcm_controller (
 	//Adapted to our specific setup
 	always @ (posedge clk)
 		begin
-			if (dcm_config_buf[7:0] > MAXIMUM_MULTIPLIER)
+			if (dcm_multiplier > MAXIMUM_MULTIPLIER)
 						dcm_multiplier <= MAXIMUM_MULTIPLIER;
-			else if (dcm_config_buf[7:0] < 2)
+			else if (dcm_multiplier < 2)
 				dcm_multiplier <= 8'd2;
 
 			if (dcm_multiplier != current_dcm_multiplier && dcm_progstate == 5'd31 && dcm_prog_ready)

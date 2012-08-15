@@ -49,7 +49,7 @@ module dcm_controller (
 	reg [7:0] current_dcm_multiplier = 8'd0;
 	reg [4:0] dcm_progstate = 5'd31;
 	reg [15:0] dcm_data;
-	wire [7:0] dcm_divider_s1 = 7'd8;
+	wire [7:0] dcm_divider_s1 = 8'd7;
 	wire [7:0] dcm_multiplier_s1 = dcm_multiplier - 8'd1;
 	
 	//Assignments:

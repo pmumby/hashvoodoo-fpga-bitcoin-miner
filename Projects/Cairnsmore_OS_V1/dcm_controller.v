@@ -83,7 +83,12 @@ module dcm_controller (
 					//We're busy, so lets handle our command:
 					if(cmd_latch_id==8'd0 && dcm_progstate == 5'd31) //Set Clock
 						begin
-							dcm_multiplier <= cmd_latch_data;
+							if(cmd_latch_data > MAXIMUM_MULTIPLIER)
+								dcm_multiplier <= MAXIMUM_MULTIPLIER;
+							else if(cmd_latch_data < 2)
+								dcm_multiplier <= 8'd2;
+							else
+								dcm_multiplier <= cmd_latch_data;
 							dcm_prog_ready <= 1;
 						end
 				end
@@ -94,11 +99,6 @@ module dcm_controller (
 	//Adapted to our specific setup
 	always @ (posedge clk)
 		begin
-			if (dcm_multiplier > MAXIMUM_MULTIPLIER)
-						dcm_multiplier <= MAXIMUM_MULTIPLIER;
-			else if (dcm_multiplier < 2)
-				dcm_multiplier <= 8'd2;
-
 			if (dcm_multiplier != current_dcm_multiplier && dcm_progstate == 5'd31 && dcm_prog_ready)
 			begin
 				current_dcm_multiplier <= dcm_multiplier;

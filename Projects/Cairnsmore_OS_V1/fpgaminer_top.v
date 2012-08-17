@@ -19,8 +19,9 @@ module fpgaminer_top (
 	//Parameters:
 	//================================================
 	parameter COMM_CLOCK_RATE = 25000000;			//Communications Clock Output from Controller in Hz
-	parameter DCM_MULTIPLIER_START = 32;			//Starting point for DCM multiplier (25Mhz/8 input x 32 = 100Mhz)
-	parameter DCM_MULTIPLIER_CAP = 64;				//Max Point Allowed for DCM multiplier (Safety ceiling)
+	parameter DCM_DIVIDER = 10;						//Starting point for DCM divider (25Mhz / 10 = 2.5Mhz increments)
+	parameter DCM_MULTIPLIER_START = 60;			//Starting point for DCM multiplier (2.5Mhz x 60 = 150Mhz)
+	parameter DCM_MULTIPLIER_CAP = 88;				//Max Point Allowed for DCM multiplier (Safety ceiling)
 	parameter UART_BAUD_RATE = 115200;				//Baud Rate to use for UART (BPS)
 	parameter UART_SAMPLE_POINT = 8;					//Point in the oversampled wave to sample the bit state for the UART (6-12 should be valid)
 	parameter CLOCK_FLASH_BITS = 26;					//Number of bits for divider of flasher. (28bit = approx 67M Divider)
@@ -94,7 +95,10 @@ module fpgaminer_top (
 		);
 	
 	//Dynamically Programmable Hash Clock DCM
-	main_dcm MAINDCM (
+	main_dcm #(
+			.DCM_DIVIDER(DCM_DIVIDER),
+			.DCM_MULTIPLIER(DCM_MULTIPLIER_START)
+		) MINDCM(
 			.RESET(dcm_reset),
 			.CLK_VALID(dcm_valid),
 			.CLK_OSC(hash_clk_buf), 

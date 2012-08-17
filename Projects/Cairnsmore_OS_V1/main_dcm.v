@@ -80,12 +80,14 @@ module main_dcm
   output        CLK_VALID
  );
 
+	parameter DCM_DIVIDER = 10;	
+	parameter DCM_MULTIPLIER = 60;
+
   // Input buffering
   //------------------------------------
   BUFG clkin1_buf
    (.O (clkin1),
     .I (CLK_OSC));
-
 
   // Clocking primitive
   //------------------------------------
@@ -99,9 +101,9 @@ module main_dcm
   wire        clkfxdv_unused;
 
   DCM_CLKGEN
-  #(.CLKFXDV_DIVIDE        (8),
-    .CLKFX_DIVIDE          (1),
-    .CLKFX_MULTIPLY        (32),
+  #(.CLKFXDV_DIVIDE        (2),
+    .CLKFX_DIVIDE          (DCM_DIVIDER),
+    .CLKFX_MULTIPLY        (DCM_MULTIPLIER),
     .SPREAD_SPECTRUM       ("NONE"),
     .STARTUP_WAIT          ("FALSE"),
     .CLKIN_PERIOD          (40.000),

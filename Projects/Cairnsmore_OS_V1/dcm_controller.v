@@ -17,8 +17,8 @@ module dcm_controller (
 
 	//Parameters:
 	//================================================
-	parameter MAXIMUM_MULTIPLIER = 64;
-	parameter INITIAL_MULTIPLIER = 16;
+	parameter MAXIMUM_MULTIPLIER = 88;
+	parameter INITIAL_MULTIPLIER = 60;
 
 	//IO Definitions:
 	//================================================
@@ -102,8 +102,8 @@ module dcm_controller (
 				end
 			else
 				begin
-					dcm_prog_state_b <= dcm_prog_state; //clock crossing buffer
-					if(dcm_prog_state_b)
+					dcm_prog_busy_b <= dcm_prog_busy; //clock crossing buffer
+					if(dcm_prog_busy_b)
 						dcm_prog_ready <= 0; //stop asserting prog_ready, the programmer has grabbed it by now.
 				end
 		end

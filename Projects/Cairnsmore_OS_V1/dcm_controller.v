@@ -49,8 +49,12 @@ module dcm_controller (
 	reg [7:0] current_dcm_multiplier = 8'd0;
 	reg [4:0] dcm_progstate = 5'd31;
 	reg [15:0] dcm_data;
-	wire [7:0] dcm_divider_s1 = 8'd7;
-	wire [7:0] dcm_multiplier_s1 = dcm_multiplier - 8'd1;
+	wire [7:0] dcm_divider_s1;
+	wire [7:0] dcm_multiplier_s1;
+	reg dcm_prog_ready_b;
+	wire dcm_prog_busy;
+	reg dcm_prog_busy_b;
+	reg [7:0] dcm_multiplier_b;
 	
 	//Assignments:
 	//================================================
@@ -60,6 +64,9 @@ module dcm_controller (
 	assign cmd_validator = data2[87:80];
 	assign cmd_trigger = (cmd_trigger_timestamp == 32'hffffffff) && (midstate == 256'd0);
 	assign cmd_valid = cmd_validator == (cmd_id ^ cmd_data);
+	assign dcm_prog_busy = (dcm_progstate != 5'd31);
+	assign dcm_divider_s1 = 8'd7;
+	assign dcm_multiplier_s1 = dcm_multiplier_b - 8'd1;
 	
 	//Toplevel Logic:
 	//================================================
@@ -95,45 +102,53 @@ module dcm_controller (
 				end
 			else
 				begin
-					//DCM Programming logic
-					//Mostly copied from https://github.com/progranism/Open-Source-FPGA-Bitcoin-Miner
-					//Adapted to our specific setup
-
-					if (dcm_multiplier != current_dcm_multiplier && dcm_progstate == 5'd31 && dcm_prog_ready)
-					begin
-						current_dcm_multiplier <= dcm_multiplier;
-						dcm_progstate <= 5'd0;
-						// DCM expects D-1 and M-1
-						dcm_data <= {dcm_multiplier_s1, dcm_divider_s1};
-						dcm_prog_ready <= 0;
-					end
-
-					if (dcm_progstate == 5'd0) {dcm_prog_en, dcm_prog_data} <= 2'b11;
-					if (dcm_progstate == 5'd1) {dcm_prog_en, dcm_prog_data} <= 2'b10;
-					if ((dcm_progstate >= 5'd2 && dcm_progstate <= 5'd9) || (dcm_progstate >= 5'd15 && dcm_progstate <= 5'd22))
-					begin
-						dcm_prog_data <= dcm_data[0];
-						dcm_data <= {1'b0, dcm_data[15:1]};
-					end
-
-					if (dcm_progstate == 5'd10) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-					if (dcm_progstate == 5'd11) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-					if (dcm_progstate == 5'd12) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-
-					if (dcm_progstate == 5'd13) {dcm_prog_en, dcm_prog_data} <= 2'b11;
-					if (dcm_progstate == 5'd14) {dcm_prog_en, dcm_prog_data} <= 2'b11;
-
-					if (dcm_progstate == 5'd23) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-					if (dcm_progstate == 5'd24) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-					if (dcm_progstate == 5'd25) {dcm_prog_en, dcm_prog_data} <= 2'b10;
-					if (dcm_progstate == 5'd26) {dcm_prog_en, dcm_prog_data} <= 2'b00;
-
-					if (dcm_progstate <= 5'd25) dcm_progstate <= dcm_progstate + 5'd1;
-
-					if (dcm_progstate == 5'd26 && dcm_prog_done)
-						dcm_progstate <= 5'd31;
-
-				end			
+					dcm_prog_state_b <= dcm_prog_state; //clock crossing buffer
+					if(dcm_prog_state_b)
+						dcm_prog_ready <= 0; //stop asserting prog_ready, the programmer has grabbed it by now.
+				end
 		end
 
+	always @(posedge dcm_prog_clk)
+		begin
+			//DCM Programming logic
+			//Mostly copied from https://github.com/progranism/Open-Source-FPGA-Bitcoin-Miner
+			//Adapted to our specific setup
+			
+			//Clock crossing buffers:
+			dcm_prog_ready_b <= dcm_prog_ready;
+			dcm_multiplier_b <= dcm_multiplier;
+			
+			if (dcm_multiplier_b != current_dcm_multiplier && dcm_progstate == 5'd31 && dcm_prog_ready_b)
+			begin
+				current_dcm_multiplier <= dcm_multiplier_b;
+				dcm_progstate <= 5'd0;
+				// DCM expects D-1 and M-1
+				dcm_data <= {dcm_multiplier_s1, dcm_divider_s1};
+			end
+
+			if (dcm_progstate == 5'd0) {dcm_prog_en, dcm_prog_data} <= 2'b11;
+			if (dcm_progstate == 5'd1) {dcm_prog_en, dcm_prog_data} <= 2'b10;
+			if ((dcm_progstate >= 5'd2 && dcm_progstate <= 5'd9) || (dcm_progstate >= 5'd15 && dcm_progstate <= 5'd22))
+			begin
+				dcm_prog_data <= dcm_data[0];
+				dcm_data <= {1'b0, dcm_data[15:1]};
+			end
+
+			if (dcm_progstate == 5'd10) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+			if (dcm_progstate == 5'd11) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+			if (dcm_progstate == 5'd12) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+
+			if (dcm_progstate == 5'd13) {dcm_prog_en, dcm_prog_data} <= 2'b11;
+			if (dcm_progstate == 5'd14) {dcm_prog_en, dcm_prog_data} <= 2'b11;
+
+			if (dcm_progstate == 5'd23) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+			if (dcm_progstate == 5'd24) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+			if (dcm_progstate == 5'd25) {dcm_prog_en, dcm_prog_data} <= 2'b10;
+			if (dcm_progstate == 5'd26) {dcm_prog_en, dcm_prog_data} <= 2'b00;
+
+			if (dcm_progstate <= 5'd25) dcm_progstate <= dcm_progstate + 5'd1;
+
+			if (dcm_progstate == 5'd26 && dcm_prog_done)
+				dcm_progstate <= 5'd31;
+		end
 endmodule

@@ -63,7 +63,7 @@ module dcm_controller (
 	assign cmd_data = data2[79:72];
 	assign cmd_validator = data2[87:80];
 	assign cmd_trigger = (cmd_trigger_timestamp == 32'hffffffff) && (midstate == 256'd0);
-	assign cmd_valid = cmd_validator == (cmd_id ^ cmd_data);
+	assign cmd_valid = cmd_validator == (cmd_id ^ cmd_data ^ 8'b01011010);
 	assign dcm_prog_busy = (dcm_progstate != 5'd31);
 	assign dcm_divider_s1 = 8'd7;
 	assign dcm_multiplier_s1 = dcm_multiplier_b - 8'd1;
@@ -108,12 +108,11 @@ module dcm_controller (
 				end
 		end
 
+	//DCM Programming logic
+	//Mostly copied from https://github.com/progranism/Open-Source-FPGA-Bitcoin-Miner
+	//Adapted to our specific setup
 	always @(posedge dcm_prog_clk)
 		begin
-			//DCM Programming logic
-			//Mostly copied from https://github.com/progranism/Open-Source-FPGA-Bitcoin-Miner
-			//Adapted to our specific setup
-			
 			//Clock crossing buffers:
 			dcm_prog_ready_b <= dcm_prog_ready;
 			dcm_multiplier_b <= dcm_multiplier;

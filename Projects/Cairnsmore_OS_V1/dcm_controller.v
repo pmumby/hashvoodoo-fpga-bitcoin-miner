@@ -37,6 +37,7 @@ module dcm_controller (
 	reg dcm_prog_en;
 	wire cmd_trigger_timestamp;
 	wire cmd_trigger;
+	wire [7:0] cmd_prefix;
 	wire [7:0] cmd_id;
 	wire [7:0] cmd_data;
 	wire cmd_validator;
@@ -59,11 +60,12 @@ module dcm_controller (
 	//Assignments:
 	//================================================
 	assign cmd_trigger_timestamp = data2[63:32];
-	assign cmd_id = data2[71:64];
-	assign cmd_data = data2[79:72];
-	assign cmd_validator = data2[87:80];
+	assign cmd_prefix = data2[231:224];		//data2 byte 29 should always be 10110111 results in xor against 01011010 with id/data
+	assign cmd_id = data2[239:232];			//data2 byte 30
+	assign cmd_data = data2[247:240];		//data2 byte 31
+	assign cmd_validator = data2[255:248];	//data2 byte 32
 	assign cmd_trigger = (cmd_trigger_timestamp == 32'hffffffff) && (midstate == 256'd0);
-	assign cmd_valid = cmd_validator == (cmd_id ^ cmd_data ^ 8'b01011010);
+	assign cmd_valid = cmd_validator == (cmd_prefix ^ cmd_id ^ cmd_data ^ 8'b01101101);
 	assign dcm_prog_busy = (dcm_progstate != 5'd31);
 	assign dcm_divider_s1 = 8'd7;
 	assign dcm_multiplier_s1 = dcm_multiplier_b - 8'd1;

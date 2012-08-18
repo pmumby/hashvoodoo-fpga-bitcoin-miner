@@ -101,7 +101,7 @@ module fpgaminer_top (
 	main_dcm #(
 			.DCM_DIVIDER(DCM_DIVIDER),
 			.DCM_MULTIPLIER(DCM_MULTIPLIER_START)
-		) MINDCM(
+		) MAINDCM(
 			.RESET(dcm_reset),
 			.CLK_VALID(dcm_valid),
 			.CLK_OSC(hash_clk_buf), 

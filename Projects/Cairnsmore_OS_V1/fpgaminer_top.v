@@ -64,17 +64,20 @@ module fpgaminer_top (
 	wire dcm_prog_done;
 	wire dcm_valid;
 	wire dcm_reset;
+	wire identify_flag;
+	wire identify_flasher;
 	
 	//Assignments:
 	//================================================
-	assign new_nonces = new_ticket;					//TODO: Cleanup
-	assign led[0] = led_nonce_fade;					//LED0 (Green): New Nonce Beacon (fader)
-	assign led[1] = (clock_flash || ~dcm_valid);	//LED1 (Red): Clock Heartbeat (blinks to indicate working input clock)
-																//		Off = no clock
-																//		On Solid = dcm invalid.
-	assign led[2] = (~TxD || ~RxD);					//LED2 (Blue): UART Activity (blinks on either rx or tx)
-	assign led[3] = ~miner_busy;						//LED3 (Amber): Idle Indicator. Lights when miner has nothing to do.
-
+	assign new_nonces = new_ticket;												//TODO: Cleanup
+	assign led[0] = (led_nonce_fade || identify_flasher);					//LED0 (Green): New Nonce Beacon (fader)
+	assign led[1] = (clock_flash || ~dcm_valid || identify_flasher);	//LED1 (Red): Clock Heartbeat (blinks to indicate working input clock)
+																							//		Off = no clock
+																							//		On Solid = dcm invalid.
+	assign led[2] = (led_serial_fade || identify_flasher);				//LED2 (Blue): UART Activity (blinks and fades on either rx or tx)
+	assign led[3] = (~miner_busy || identify_flasher);						//LED3 (Amber): Idle Indicator. Lights when miner has nothing to do.
+	assign identify_flasher = (clock_flash && identify_flag);			//Identify Mode (ALL LEDs flash with heartbeat)
+	
 	//Module Instantiation:
 	//================================================
 	
@@ -121,7 +124,8 @@ module fpgaminer_top (
 			.dcm_prog_clk(comm_clk_buf),
 			.dcm_prog_en(dcm_prog_en),
 			.dcm_prog_data(dcm_prog_data),
-			.dcm_prog_done(dcm_prog_done)
+			.dcm_prog_done(dcm_prog_done),
+			.identify(identify_flag)
 		);
 	
 	//Hub core, this is a holdover from Icarus. This should be cleaned up and ported back to core logic, since miners are now "solo".

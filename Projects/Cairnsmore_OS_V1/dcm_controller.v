@@ -13,6 +13,7 @@ module dcm_controller (
 		dcm_prog_clk,
 		dcm_prog_done,
 		dcm_prog_en,
+		identify
 	);
 
 	//Parameters:
@@ -30,6 +31,7 @@ module dcm_controller (
 	output dcm_prog_data;
 	output dcm_prog_en;
 	input dcm_prog_done;
+	output identify;
 	
 	//Register/Wire Definitions:
 	//================================================
@@ -56,6 +58,7 @@ module dcm_controller (
 	wire dcm_prog_busy;
 	reg dcm_prog_busy_b;
 	reg [7:0] dcm_multiplier_b;
+	reg identify;
 	
 	//Assignments:
 	//================================================
@@ -100,6 +103,11 @@ module dcm_controller (
 								dcm_multiplier <= cmd_latch_data;
 							dcm_prog_ready <= 1;
 							busy <= 0;
+						end
+					if(cmd_latch_id==8'd1) //Set Identify Mode
+						begin
+							//Set identify flag to first bit of command data byte.
+							identify <= cmd_latch_data[0];
 						end
 				end
 			else

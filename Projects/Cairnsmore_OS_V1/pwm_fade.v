@@ -19,7 +19,7 @@ module pwm_fade (clk, trigger, drive);
 
    // Xilinx ISE 13.2 cannot handle $clog2 in localparam, but it works
    // in the index
-`define FADE_BITS 27
+`define FADE_BITS 26
    
    reg [LEVEL_BITS-1:0] pwm_counter;
    always @(posedge clk) pwm_counter = pwm_counter + 1;

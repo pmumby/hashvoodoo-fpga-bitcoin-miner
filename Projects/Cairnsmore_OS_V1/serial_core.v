@@ -26,7 +26,7 @@ module serial_core #(parameter CLOCK=25000000, BAUD=57600, SAMPLE_POINT=8)(
 	output rx_ready;
 	input tx_ready;	
    output [255:0] midstate;
-   output [95:0] data2;
+   output [255:0] data2;
 	input [31:0] word;
 	output tx_busy;
 	output rx_busy;
@@ -62,7 +62,7 @@ module serial_core #(parameter CLOCK=25000000, BAUD=57600, SAMPLE_POINT=8)(
 	//===================================================
    assign tx_busy = (|tx_mux_state);
    assign midstate = rx_input_buffer[511:256];
-   assign data2 = rx_input_buffer[95:0];
+   assign data2 = rx_input_buffer[255:0];
 	assign rx_ready = uart_rx_ready;
 
 	//Logic

@@ -835,7 +835,7 @@ CGEN : CLOCKGEN_CONTROLLER
    BGMUX_ON_OFF : BUFGMUX
    port map (
       O 	=>	GCLOCK,    
-      I0 =>	CLK_180MHZ_210MHZ,
+      I0 =>	CLOCK_25MHZ,
       I1 => '0',  
       S 	=> CLOCK_STOP
    );

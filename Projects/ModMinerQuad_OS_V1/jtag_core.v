@@ -22,7 +22,6 @@ module jtag_core (
 	//===================================================
 	input clk;
 	input new_nonce;
-	input [31:0] word;
    output [255:0] midstate_out;
    output [255:0] data_out;
 	input [31:0] word;
@@ -31,8 +30,10 @@ module jtag_core (
 	//Wire & Register Declaration
 	//===================================================
 	reg new_work = 1'b0;
+	reg [255:0] midstate_out = 256'd0;
+	reg [255:0] data_out = 256'd0;
 	reg [255:0] midstate = 256'd0;
-	reg [255:0] data = 96'd0;
+	reg [255:0] data = 256'd0;
 	// JTAG
 	wire jt_capture, jt_drck, jt_reset, jt_sel, jt_shift, jt_tck, jt_tdi, jt_update;
 	wire jt_tdo;
@@ -44,12 +45,14 @@ module jtag_core (
 	// Golden Nonce FIFO: from rx_hash_clk to TCK
 	wire [31:0] tck_golden_nonce;
 	wire fifo_empty, fifo_full;
-	wire fifo_we = rx_new_nonce & (rx_golden_nonce != 32'hFFFFFFFF) & ~fifo_full;
+	wire fifo_we = new_nonce & (rx_golden_nonce != 32'hFFFFFFFF) & ~fifo_full;
 	wire fifo_rd = checksum_valid & jt_update & ~jtag_we & (jtag_addr == 4'hE) & ~fifo_empty & ~jt_reset;
 	wire jtag_we = dr[36];
 	wire [3:0] jtag_addr = dr[35:32];
-	reg [351:0] tx_buffer = 352'd0;
+	reg [511:0] tx_buffer = 512'd0;
+	reg [511:0] current_job = 512'd0;
 	reg [2:0] tx_work_flag = 3'b0;
+	reg new_work_flag = 1'b0;
 	
 	//Module Instantiation
 	//===================================================

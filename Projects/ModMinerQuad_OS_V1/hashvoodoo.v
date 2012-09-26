@@ -82,7 +82,7 @@ module HASHVOODOO (
 	//Clock Buffer
 	IBUFG IBUFG_CLK_BUF (
 			.O(clk_buf),
-			.I(clk),		//Clock input
+			.I(clk)		//Clock input
 		);
 	
 	//Dynamically Programmable Hash Clock DCM

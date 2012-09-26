@@ -1,31 +1,29 @@
-# UCF for a Cairnsmore1 board
-NET "clk_n" LOC = "J1" |IOSTANDARD = "LVDS_33";			//25Mhz Differential Source Clock from Controller
-NET "clk_p" LOC = "J3" |IOSTANDARD = "LVDS_33";			//25Mhz Differential Source Clock from Controller
-NET "clk_comm" LOC = "C1" |IOSTANDARD = "LVCMOS33";	//25Mhz Clock for UART from controller
-NET "clk_comm" CLOCK_DEDICATED_ROUTE = FALSE;			//Grrr...
+# UCF for a ModMiner Quad board
+NET "clk" LOC = "K20" |IOSTANDARD = "LVCMOS33";	//100Mhz input clock
+NET "clk" CLOCK_DEDICATED_ROUTE = FALSE;			//Grrr...
 
 # serial port receive & transmit
-NET "RxD" LOC = "C3"	|IOSTANDARD = "LVCMOS33" |PULLUP;
-NET "TxD" LOC = "F2" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
+#NET "RxD" LOC = "C3"	|IOSTANDARD = "LVCMOS33" |PULLUP;
+#NET "TxD" LOC = "F2" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
 
 # LED Array
-NET "led[0]" LOC = "A18" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
-NET "led[1]" LOC = "B18" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
-NET "led[2]" LOC = "A17" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
-NET "led[3]" LOC = "A16" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
+#NET "led[0]" LOC = "A18" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
+#NET "led[1]" LOC = "B18" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
+#NET "led[2]" LOC = "A17" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
+#NET "led[3]" LOC = "A16" |IOSTANDARD = "LVCMOS33" |SLEW="QUIETIO";
 
 # DIP Switch Array
-NET "dip[0]" LOC = "A4" |IOSTANDARD = "LVCMOS33";
-NET "dip[1]" LOC = "D6" |IOSTANDARD = "LVCMOS33";
-NET "dip[2]" LOC = "C6" |IOSTANDARD = "LVCMOS33";
-NET "dip[3]" LOC = "C8" |IOSTANDARD = "LVCMOS33";
+#NET "dip[0]" LOC = "A4" |IOSTANDARD = "LVCMOS33";
+#NET "dip[1]" LOC = "D6" |IOSTANDARD = "LVCMOS33";
+#NET "dip[2]" LOC = "C6" |IOSTANDARD = "LVCMOS33";
+#NET "dip[3]" LOC = "C8" |IOSTANDARD = "LVCMOS33";
 
 # New split reset architecture:
-NET "reset_a" LOC = "B22" |IOSTANDARD = "LVCMOS33";
-NET "reset_b" LOC = "D1" |IOSTANDARD = "LVCMOS33";
-NET "reset_select" LOC = "D7" |PULLUP |IOSTANDARD = "LVCMOS33";
+#NET "reset_a" LOC = "B22" |IOSTANDARD = "LVCMOS33";
+#NET "reset_b" LOC = "D1" |IOSTANDARD = "LVCMOS33";
+#NET "reset_select" LOC = "D7" |PULLUP |IOSTANDARD = "LVCMOS33";
 
-# Input Clocks from Controller
+# Timing Constraints
 NET "clk_dcm" TNM_NET = clk_dcm;
 NET "clk_comm" TNM_NET = clk_comm;
 TIMESPEC TS_clk_dcm = PERIOD "clk_dcm" 200 MHz HIGH 50 %;

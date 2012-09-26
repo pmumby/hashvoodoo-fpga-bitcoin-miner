@@ -1,4 +1,4 @@
-This is the bitstream for Cairnsmore1 based on Icarus sources and the Icarus hashing core.
+This is the bitstream for the ModMiner Quad board, for HashVoodoo using the Icarus Hashing Core.
 
 To build, first open the icarus core, and synthesize it only, and copy the NGC file into this project. Then do a full build.
 

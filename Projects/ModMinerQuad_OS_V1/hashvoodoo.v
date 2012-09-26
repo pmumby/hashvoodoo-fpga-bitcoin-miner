@@ -4,9 +4,7 @@
 // Paul Mumby 2012
 //////////////////////////////////////////////////////////////////////////////////
 module HASHVOODOO (
-		clk_p, 
-		clk_n, 
-		clk_comm, 
+		clk, 
 		RxD, 
 		TxD, 
 		led, 
@@ -18,20 +16,18 @@ module HASHVOODOO (
 
 	//Parameters:
 	//================================================
-	parameter CLOCK_RATE = 25000000;					//Input Clock Output from Controller in Hz
-	parameter DCM_DIVIDER = 10;						//Starting point for DCM divider (25Mhz / 10 = 2.5Mhz increments)
-	parameter DCM_MULTIPLIER_START = 60;			//Starting point for DCM multiplier (2.5Mhz x 60 = 150Mhz)
-	parameter DCM_MULTIPLIER_CAP = 88;				//Max Point Allowed for DCM multiplier (Safety ceiling)
-	parameter DCM_MULTIPLIER_MIN = 20;				//Minimum Allowed for DCM multiplier (If it falls below this something is seriously wrong)
+	parameter CLOCK_RATE = 100000000;				//Input Clock Output from Controller in Hz
+	parameter DCM_DIVIDER = 50;						//Starting point for DCM divider (100Mhz / 50 = 2Mhz increments)
+	parameter DCM_MULTIPLIER_START = 75;			//Starting point for DCM multiplier (2Mhz x 75 = 150Mhz)
+	parameter DCM_MULTIPLIER_CAP = 110;				//Max Point Allowed for DCM multiplier (Safety ceiling)
+	parameter DCM_MULTIPLIER_MIN = 25;				//Minimum Allowed for DCM multiplier (If it falls below this something is seriously wrong)
 	parameter UART_BAUD_RATE = 115200;				//Baud Rate to use for UART (BPS)
 	parameter UART_SAMPLE_POINT = 8;					//Point in the oversampled wave to sample the bit state for the UART (6-12 should be valid)
 	parameter CLOCK_FLASH_BITS = 26;					//Number of bits for divider of flasher. (28bit = approx 67M Divider)
 	
 	//IO Definitions:
 	//================================================
-   input clk_p;			//Input Clock From Controller (P signal of diff pair)
-   input clk_n;			//Input Clock From Controller (N signal of diff pair)
-   input clk_comm;		//Input Comm Clock From Controller (Single ended)
+   input clk;				//Input Clock
    input RxD;				//UART RX Pin (From Controller)
    output TxD;				//UART TX Pin  (To Controller)
    output [3:0] led;		//LED Array
@@ -45,7 +41,7 @@ module HASHVOODOO (
 	reg reset;								//Actual Reset Signal
 	wire clk_buf;							//Actually Used Clock Signals
 	wire clk_dcm;							//Output of hash clock DCM
-	wire clk_comm_buf;							//Output of comm clock DCM
+	wire clk_comm_buf;					//Output of comm clock DCM
 	wire clock_flash;						//Flasher output (24bit divider of clock)
 	wire miner_busy;						//Miner Busy Flag
    wire [32:0] slave_nonces;			//Nonce found by worker TODO: Rename/Cleanup (this is a holdover from the icarus pair code)
@@ -83,23 +79,12 @@ module HASHVOODOO (
 	//Module Instantiation:
 	//================================================
 	
-	//LVDS Clock Buffer
-	IBUFGDS #(
-			.DIFF_TERM("TRUE"),
-			.IOSTANDARD("DEFAULT")
-		) CLK_LVDS_BUF (
+	//Clock Buffer
+	IBUFG IBUFG_CLK_BUF (
 			.O(clk_buf),
-			.I(clk_p),	//Diff_p clock input
-			.IB(clk_n)	//Diff_n clock input
+			.I(clk),		//Clock input
 		);
 	
-	//Comm Clock Buffer
-	BUFG CLK_COMM_BUF
-		(
-			.I   (clk_comm),
-			.O   (clk_comm_buf)
-		);
-
 	//Dynamically Programmable Hash Clock DCM
 	main_dcm #(
 			.DCM_DIVIDER(DCM_DIVIDER),
@@ -109,7 +94,7 @@ module HASHVOODOO (
 			.CLK_VALID(dcm_valid),
 			.CLK_OSC(clk_buf), 
 			.CLK_HASH(clk_dcm),
-			.PROGCLK(clk_comm_buf),
+			.PROGCLK(clk_buf),
 			.PROGDATA(dcm_prog_data),
 			.PROGEN(dcm_prog_en),
 			.PROGDONE(dcm_prog_done)
@@ -122,11 +107,11 @@ module HASHVOODOO (
 			.INITIAL_MULTIPLIER(DCM_MULTIPLIER_START),
 			.INITIAL_DIVIDER(DCM_DIVIDER)
 		) DCM_CONTROL (
-			.clk(clk_comm_buf),
+			.clk(clk_dcm),
 			.data2(data2),
 			.midstate(midstate),
 			.start(start_mining),
-			.dcm_prog_clk(clk_comm_buf),
+			.dcm_prog_clk(clk_buf),
 			.dcm_prog_en(dcm_prog_en),
 			.dcm_prog_data(dcm_prog_data),
 			.dcm_prog_done(dcm_prog_done),
@@ -138,7 +123,7 @@ module HASHVOODOO (
    hub_core #(
 			.SLAVES(1)
 		) HUBCORE (
-			.hash_clk(clk_comm_buf), 
+			.hash_clk(clk_dcm), 
 			.new_nonces(new_nonces), 
 			.golden_nonce(golden_nonce), 
 			.serial_send(serial_send), 
@@ -146,23 +131,16 @@ module HASHVOODOO (
 			.slave_nonces(slave_nonces)
 		);
 	
-	//New Serial Core. Handles all communications in and out to the host.
-	serial_core #(
-			.CLOCK(CLOCK_RATE),
-			.BAUD(UART_BAUD_RATE),
-			.SAMPLE_POINT(UART_SAMPLE_POINT)
-		) SERIAL_COMM (
-			.clk(clk_comm_buf),
-			.rx(RxD),
-			.tx(TxD),
-			.rx_ready(start_mining),
-			.tx_ready(serial_send),
-			.midstate(midstate),
-			.data2(data2),
+	//JTAG Comm Core. Handles all communications in and out to the host.
+	jtag_core JTAG_COMM (
+			.clk(clk_dcm),
+			.new_nonce(),
+			.midstate_out(midstate),
+			.data_out(data2),
 			.word(golden_nonce),
-			.tx_busy(serial_busy)
+			.new_work()
 		);
-		
+	
 	//Main Hashing Core, This does all the work
 	sha256_top M (
 			.clk(clk_dcm), 
@@ -175,6 +153,7 @@ module HASHVOODOO (
 			.start_mining(start_mining)
 		);
 	
+	/*
 	//Flasher, this handles dividing down the comm clock by 24bits to blink the clock status LED
 	flasher #(
 			.BITS(CLOCK_FLASH_BITS)
@@ -196,6 +175,8 @@ module HASHVOODOO (
 			.trigger(~TxD || ~RxD), 
 			.drive(led_serial_fade)
 		);	
+	
+	*/
 	
 	//Toplevel Logic:
 	//================================================

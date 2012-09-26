@@ -200,15 +200,6 @@ module HASHVOODOO (
 	//Toplevel Logic:
 	//================================================
 
-	//Reset handling code. Handles location specific reset signals
-	always@ (reset_select or reset_a or reset_b)
-		begin
-			if(reset_select)
-				reset <= reset_a;
-			else
-				reset <= reset_b;
-		end
-
 	//Clock Domain Buffering of ticket signal (I believe) TODO: Identify & Cleanup
 	always@ (posedge clk_buf)
 		begin

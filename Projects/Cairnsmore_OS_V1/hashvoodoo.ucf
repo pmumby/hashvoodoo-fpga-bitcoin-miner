@@ -36,10 +36,6 @@ NET "clk_dcm" TNM_NET =  FFS "GRP_HASH";
 NET "clk_comm" TNM_NET =  FFS "GRP_COMM";
 TIMESPEC TS_Boundry1 = FROM "GRP_HASH" TO "GRP_COMM" TIG ;
 TIMESPEC TS_Boundry2 = FROM "GRP_COMM" TO "GRP_HASH" TIG ;
-NET "dip[*]" TIG;
-NET "M/midstate_d1[*]" TIG;
-NET "M/data2_d1[*]" TIG;
-NET "M/got_ticket_d1" TIG;
 
 #VCCAUX Line Config From makomk
 CONFIG VCCAUX=3.3;

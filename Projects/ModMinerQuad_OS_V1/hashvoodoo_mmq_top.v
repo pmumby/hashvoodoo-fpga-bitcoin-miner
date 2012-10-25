@@ -49,7 +49,7 @@ module HASHVOODOO (
 	
 	//Input Clock Buffer
 	IBUFG clkin1_buf (
-		.I (CLK_100MHZ), 
+		.I (clk), 
 		.O (clkin_100MHZ)
 	);
 
